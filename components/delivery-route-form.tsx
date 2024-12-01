@@ -57,7 +57,7 @@ export default function DeliveryRouteForm() {
       <CardHeader>
         <CardTitle>Formulario de Ruta de Delivery</CardTitle>
         {/* Sección de búsqueda */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 pt-2">
           <Input
             type="text"
             placeholder="Buscar ID de ruta"
@@ -109,7 +109,7 @@ export default function DeliveryRouteForm() {
           </div>
 
           {/* Información de la orden */}
-          <Card className="p-4">
+          <Card className="">
             <CardHeader>
               <CardTitle>Información de la Orden</CardTitle>
             </CardHeader>
