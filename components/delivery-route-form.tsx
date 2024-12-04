@@ -1,26 +1,60 @@
 "use client";
 
 import * as z from "zod";
-import { useState } from "react";
-import { Search } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { CalendarIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Loader, Search } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { RouteSchema } from "@/schemas/schemas";
+import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, FormProvider } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreateRoute } from "@/actions/actions";
 
-export default function DeliveryRouteForm() {
-  const [isPriority, setIsPriority] = useState(false);
+import {
+  createRoute,
+  findRoute,
+  getDrivers,
+  updateRoute,
+} from "@/actions/actions";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+export default function DeliveryRouteForm({ routeId }: { routeId?: string }) {
+  const [date, setDate] = useState<Date>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchId, setSearchId] = useState<number | null>(
+    routeId ? parseInt(routeId) : null
+  );
+  const [drivers, setDrivers] = useState<{ id: number; name: string }[]>([]);
+
+  const [message, setMessage] = useState<{
+    type: "error" | "success";
+    text: string;
+  } | null>(null);
 
   const formMethods = useForm<z.infer<typeof RouteSchema>>({
     resolver: zodResolver(RouteSchema),
     defaultValues: {
-      id: 0,
       driverId: 0,
       date: "",
       notes: "",
@@ -38,40 +72,149 @@ export default function DeliveryRouteForm() {
   const {
     handleSubmit,
     register,
-    watch,
     setValue,
+    watch,
+    reset,
     formState: { errors },
   } = formMethods;
 
-  const onSubmit = async (values: z.infer<typeof RouteSchema>) => {
+  const showMessage = (type: "error" | "success", text: string) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 5000);
+  };
+
+  // Obtener conductores
+  const fetchDrivers = async () => {
     try {
-      const data = await CreateRoute(values);
-      console.log(data);
-    } catch (error: any) {
-      console.error(error);
+      const response = await getDrivers();
+      setDrivers(response);
+    } catch (err) {
+      showMessage("error", "Error al cargar los conductores.");
+    }
+  };
+
+  useEffect(() => {
+    fetchDrivers();
+  }, []);
+
+  // Buscar ruta por ID
+  const onSearchRoute = async () => {
+    if (!searchId || searchId <= 0) {
+      showMessage("error", "Por favor, ingresa un ID válido.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await findRoute(searchId);
+
+      if (result.success) {
+        reset(result.data);
+        setValue("driverId", result.data.driverId);
+        setDate(result.data.date);
+        showMessage("success", result.message);
+      } else {
+        showMessage("error", result.message);
+      }
+    } catch (err: any) {
+      showMessage("error", `Error al buscar la ruta. ${err.message || err}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Solo ejecuta la búsqueda cuando se pasa un routeId (para la edición)
+  useEffect(() => {
+    if (routeId) {
+      setSearchId(parseInt(routeId));
+      onSearchRoute();
+    }
+  }, [routeId]);
+
+  // Crear ruta
+  const onSubmit = async (values: z.infer<typeof RouteSchema>) => {
+    setIsSubmitting(true);
+    try {
+      const data = await createRoute(values);
+
+      if (data.error) {
+        showMessage("error", data.error);
+      } else {
+        reset();
+        showMessage("success", data.message);
+      }
+    } catch (err: any) {
+      showMessage("error", `Error al enviar el formulario. ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Actualizar ruta
+  const onUpdateRoute = async (values: z.infer<typeof RouteSchema>) => {
+    setIsSubmitting(true);
+    try {
+      const data = await updateRoute(Number(routeId), values);
+
+      if (data.error) {
+        showMessage("error", data.error);
+      } else {
+        showMessage("success", data.message);
+      }
+    } catch (err: any) {
+      showMessage("error", `Error al enviar el formulario. ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto">
+    <Card className="w-full max-w-7xl mx-auto">
       <CardHeader>
         <CardTitle>Formulario de Ruta de Delivery</CardTitle>
-        {/* Sección de búsqueda */}
-        <div className="flex items-center space-x-2 pt-2">
-          <Input
-            type="text"
-            placeholder="Buscar ID de ruta"
-            className="flex-grow"
-          />
-          <Button type="button" size="icon">
-            <Search className="h-4 w-4" />
-          </Button>
-        </div>
+        {!routeId && (
+          <div className="flex items-center space-x-2 pt-2">
+            <Input
+              type="number"
+              className="flex-grow"
+              placeholder="Buscar ID de ruta"
+              value={searchId || ""}
+              onChange={(e) => setSearchId(Number(e.target.value) || null)}
+              disabled={isLoading}
+            />
+            <Button
+              type="button"
+              size="icon"
+              onClick={onSearchRoute}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader className="w-6 h-6 animate-spin" />
+              ) : (
+                <Search className="w-6 h-6" />
+              )}
+            </Button>
+          </div>
+        )}
+        {message && (
+          <p
+            className={
+              message.type === "error" ? "text-red-500" : "text-green-500"
+            }
+          >
+            {message.text}
+          </p>
+        )}
       </CardHeader>
+
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Información de la ruta */}
-          <div className="w-ful">
+        <form
+          onSubmit={
+            routeId ? handleSubmit(onUpdateRoute) : handleSubmit(onSubmit)
+          }
+          className="space-y-6"
+        >
+          <Card>
             <CardHeader>
               <CardTitle>Información de la Ruta</CardTitle>
             </CardHeader>
@@ -80,78 +223,146 @@ export default function DeliveryRouteForm() {
                 <Label htmlFor="routeId">ID de la Ruta</Label>
                 <Input
                   id="routeId"
-                  placeholder="Ingrese el ID de la ruta"
                   {...register("id", { valueAsNumber: true })}
+                  disabled={!!routeId}
+                  placeholder="ID de la ruta"
                 />
+                {errors.id && (
+                  <span className="text-red-500">{errors.id.message}</span>
+                )}
               </div>
               <div className="flex-1 min-w-[200px]">
-                <Label htmlFor="driverName">ID del Conductor</Label>
-                <Input
-                  id="driverName"
-                  placeholder="Ingrese el ID del conductor"
+                <Label htmlFor="driverId">Nombre del Conductor</Label>
+                <Select
                   {...register("driverId", { valueAsNumber: true })}
-                />
+                  disabled={isLoading}
+                  value={watch("driverId").toString()}
+                  onValueChange={(value) => setValue("driverId", Number(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue>
+                      {drivers?.find((d) => d.id === watch("driverId"))?.name ||
+                        "Selecciona un conductor"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {drivers?.map((driver) => (
+                      <SelectItem key={driver.id} value={driver.id.toString()}>
+                        {driver.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {errors.driverId && (
+                  <span className="text-red-500">
+                    {errors.driverId.message}
+                  </span>
+                )}
               </div>
+
               <div className="flex-1 min-w-[200px]">
                 <Label htmlFor="scheduledDate">Fecha Programada</Label>
-                <Input id="scheduledDate" type="date" {...register("date")} />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      disabled={isLoading}
+                      variant={"outline"}
+                      className={cn(
+                        "w-[280px] justify-start text-left font-normal",
+                        !date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon />
+                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                {errors && (
+                  <span className="text-red-500">
+                    {errors.date?.message || ""}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-[200px]">
                 <Label htmlFor="notes">Notas</Label>
                 <Textarea
                   id="notes"
-                  placeholder="Ingrese notas"
                   {...register("notes")}
                   rows={5}
+                  disabled={isLoading}
+                  placeholder="Escribe notas adicionales"
                 />
-              </div>
-            </CardContent>
-          </div>
-
-          {/* Información de la orden */}
-          <Card className="">
-            <CardHeader>
-              <CardTitle>Información de la Orden</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-wrap justify-center items-center gap-4">
-              <div className="flex-1 min-w-[200px]">
-                <Label htmlFor="sequence">Secuencia</Label>
-                <Input
-                  id="sequence"
-                  type="number"
-                  placeholder="Ingrese la secuencia"
-                  {...register("orders.0.sequence", { valueAsNumber: true })}
-                />
-              </div>
-              <div className="flex-1 min-w-[200px]">
-                <Label htmlFor="value">Valor $</Label>
-                <Input
-                  id="value"
-                  type="number"
-                  step="0.01"
-                  placeholder="Ingrese el valor"
-                  {...register("orders.0.value", { valueAsNumber: true })}
-                />
-              </div>
-              <div className="flex items-center space-x-2 min-w-[200px]">
-                <Switch
-                  id="priority"
-                  checked={watch("orders.0.priority")}
-                  onCheckedChange={(checked) =>
-                    setValue("orders.0.priority", checked)
-                  }
-                />
-                <Label htmlFor="priority">Prioritaria</Label>
+                {errors.notes && (
+                  <span className="text-red-500">{errors.notes.message}</span>
+                )}
               </div>
             </CardContent>
           </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Información de la Orden</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-4">
+              {watch("orders")?.map((order, index) => (
+                <div key={index} className="flex gap-4">
+                  <div className="flex-1">
+                    <Label htmlFor={`orders.${index}.sequence`}>
+                      Secuencia
+                    </Label>
+                    <Input
+                      id={`orders.${index}.sequence`}
+                      {...register(`orders.${index}.sequence`, {
+                        valueAsNumber: true,
+                      })}
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Label htmlFor={`orders.${index}.value`}>Valor $</Label>
+                    <Input
+                      id={`orders.${index}.value`}
+                      {...register(`orders.${index}.value`, {
+                        valueAsNumber: true,
+                      })}
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="flex items-center justify-center gap-x-3">
+                    <Switch
+                      id={`orders.${index}.priority`}
+                      checked={watch(`orders.${index}.priority`)}
+                      onCheckedChange={(checked) =>
+                        setValue(`orders.${index}.priority`, checked)
+                      }
+                      disabled={isLoading}
+                    />
+                    <Label htmlFor={`orders.${index}.priority`}>
+                      Prioritaria
+                    </Label>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
 
-          {/* Botón de envío */}
-          <div className="flex justify-end">
-            <Button type="submit" className="w-full max-w-[200px]">
-              Crear Ruta
-            </Button>
-          </div>
+          <Button className="w-full" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <Loader className="size-4 mr-2 animate-spin" />
+            ) : routeId ? (
+              "Actualizar Ruta"
+            ) : (
+              "Crear Ruta"
+            )}
+          </Button>
         </form>
       </CardContent>
     </Card>

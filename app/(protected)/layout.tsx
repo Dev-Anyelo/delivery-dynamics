@@ -1,9 +1,10 @@
 import "../globals.css";
 import type { Metadata } from "next";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: "Delivery Dynamics",
-  description: "An app to help you manage your deliveries",
+  title: "Delivery Dynamics - Dashboard",
+  description: "Dashboard for Delivery Dynamics",
 };
 
 import { AppSidebar } from "@/components/app-sidebar";
@@ -36,8 +37,8 @@ export default function DashboardLayout({
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
+            {/* <Separator orientation="vertical" className="mr-2 h-4" /> */}
+            {/* <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="#">
@@ -49,10 +50,13 @@ export default function DashboardLayout({
                   <BreadcrumbPage>Data Fetching</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
-            </Breadcrumb>
+            </Breadcrumb> */}
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-y-8 px-8 pt-3">{children}</div>
+        <main className="flex flex-1 flex-col gap-y-8 px-8 pt-3">
+          {children}
+          <Toaster />
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );
