@@ -3,7 +3,7 @@
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import DeliveryRouteForm from "@/components/delivery-route-form";
+import DeliveryRouteFormEdit from "@/components/delivery-route-form-edit";
 
 const RouteDetailsPage = () => {
   const { id } = useParams();
@@ -35,7 +35,7 @@ const RouteDetailsPage = () => {
       <p className="text-sm text-muted-foreground mx-auto">
         Aquí puedes editar y ver los detalles la ruta seleccionada.
       </p>
-      <DeliveryRouteForm routeId={routeId} />
+      <DeliveryRouteFormEdit routeId={routeId} />
     </>
   );
 };

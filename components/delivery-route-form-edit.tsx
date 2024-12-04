@@ -3,13 +3,13 @@
 import * as z from "zod";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { es, se } from "date-fns/locale";
+import { es } from "date-fns/locale";
+import { Loader } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader, Search } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { RouteSchema } from "@/schemas/schemas";
@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { createRoute, findRoute, getDrivers } from "@/actions/actions";
+import { findRoute, getDrivers, updateRoute } from "@/actions/actions";
 
 import {
   Popover,
@@ -34,18 +34,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const DeliveryRouteForm = () => {
+const DeliveryRouteFormEdit = ({ routeId }: { routeId?: string }) => {
+  const [date, setDate] = useState<Date | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [date, setDate] = useState<Date | undefined>();
-  const [searchId, setSearchId] = useState<number | null>(null);
-
+  const [drivers, setDrivers] = useState<{ id: number; name: string }[]>([]);
   const [message, setMessage] = useState<{
     type: "error" | "success";
     text: string;
   } | null>(null);
-
-  const [drivers, setDrivers] = useState<{ id: number; name: string }[]>([]);
 
   const formMethods = useForm<z.infer<typeof RouteSchema>>({
     resolver: zodResolver(RouteSchema),
@@ -87,42 +84,30 @@ const DeliveryRouteForm = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDrivers();
-  }, []);
-
-  const onSearchRoute = async () => {
-    if (!searchId || searchId <= 0) {
-      showMessage("error", "Por favor, ingresa un ID válido.");
-      return;
-    }
-
+  const fetchRouteDetails = async () => {
     setIsLoading(true);
     try {
-      const result = await findRoute(searchId);
-
+      const result = await findRoute(Number(routeId));
       if (result.success) {
         reset(result.data);
         setValue("id", result.data.id);
         setValue("driverId", result.data.driverId);
         setDate(new Date(result.data.date));
-        showMessage("success", result.message);
+        showMessage("success", "Datos de la ruta cargados correctamente.");
       } else {
-        showMessage("error", result.message || "Ruta no encontrada");
-        reset({
-          id: searchId,
-          driverId: 0,
-          date: new Date().toISOString(),
-          notes: "",
-          orders: [],
-        });
+        showMessage("error", result.message);
       }
     } catch (err: any) {
-      showMessage("error", `Error: ${err.message || err}`);
+      showMessage("error", `Error al cargar la ruta. ${err.message || err}`);
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchDrivers();
+    fetchRouteDetails();
+  }, [routeId]);
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (selectedDate) {
@@ -132,24 +117,25 @@ const DeliveryRouteForm = () => {
         selectedDate.getDate()
       );
       setDate(normalizedDate);
-      setValue("date", normalizedDate.toString());
+      setValue("date", normalizedDate.toISOString());
     }
   };
 
   const handleFormSubmit = async (values: z.infer<typeof RouteSchema>) => {
     setIsSubmitting(true);
     try {
-      const result = await createRoute(values);
-
-      if (!result.error) {
+      const result = await updateRoute(Number(routeId), values);
+      if (result.success) {
+        showMessage("success", "Ruta actualizada exitosamente.");
+        fetchRouteDetails();
+      } else {
         showMessage("error", result.message);
-        return;
       }
-
-      showMessage("success", result.message || "Ruta guardada correctamente.");
-      reset();
     } catch (err: any) {
-      showMessage("error", `Error al guardar la ruta. ${err.message || err}`);
+      showMessage(
+        "error",
+        `Error al actualizar la ruta. ${err.message || err}`
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -158,38 +144,15 @@ const DeliveryRouteForm = () => {
   return (
     <Card className="w-full max-w-7xl mx-auto">
       <CardHeader>
-        <CardTitle>Crear Nueva Ruta de Delivery</CardTitle>
-        <div className="flex items-center space-x-2 pt-2">
-          <Input
-            type="number"
-            className="flex-grow"
-            placeholder="Buscar ID de ruta"
-            value={searchId || ""}
-            onChange={(e) => setSearchId(Number(e.target.value) || null)}
-            disabled={isLoading}
-          />
-          <Button
-            type="button"
-            size="icon"
-            onClick={onSearchRoute}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <Loader className="w-6 h-6 animate-spin" />
-            ) : (
-              <Search className="w-6 h-6" />
-            )}
-          </Button>
-        </div>
+        <CardTitle>Editar Ruta de Delivery</CardTitle>
         {message && (
-          <div
-            className={cn(
-              "p-2 rounded-md mt-4",
+          <p
+            className={
               message.type === "error" ? "text-red-500" : "text-green-500"
-            )}
+            }
           >
             {message.text}
-          </div>
+          </p>
         )}
       </CardHeader>
 
@@ -342,11 +305,12 @@ const DeliveryRouteForm = () => {
               ))}
             </CardContent>
           </Card>
+
           <Button className="w-full" type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <Loader className="size-4 mr-2 animate-spin" />
             ) : (
-              "Crear Ruta"
+              "Guardar Cambios"
             )}
           </Button>
         </form>
@@ -355,4 +319,4 @@ const DeliveryRouteForm = () => {
   );
 };
 
-export default DeliveryRouteForm;
+export default DeliveryRouteFormEdit;
