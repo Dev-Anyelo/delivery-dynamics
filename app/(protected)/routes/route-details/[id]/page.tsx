@@ -2,11 +2,10 @@
 
 import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import DeliveryRouteForm from "@/components/delivery-route-form";
 
 const RouteDetailsPage = () => {
-  const router = useRouter();
   const { id } = useParams();
   const [routeId, setRouteId] = useState<string | undefined>(undefined);
 

@@ -42,10 +42,11 @@ export default function DeliveryRouteForm({ routeId }: { routeId?: string }) {
   const [date, setDate] = useState<Date>();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [drivers, setDrivers] = useState<{ id: number; name: string }[]>([]);
+
   const [searchId, setSearchId] = useState<number | null>(
     routeId ? parseInt(routeId) : null
   );
-  const [drivers, setDrivers] = useState<{ id: number; name: string }[]>([]);
 
   const [message, setMessage] = useState<{
     type: "error" | "success";
@@ -106,10 +107,11 @@ export default function DeliveryRouteForm({ routeId }: { routeId?: string }) {
 
     setIsLoading(true);
     try {
-      const result = await findRoute(searchId);
+      const result = await findRoute(Number(searchId));
 
       if (result.success) {
         reset(result.data);
+        setValue("id", result.data.id);
         setValue("driverId", result.data.driverId);
         setDate(result.data.date);
         showMessage("success", result.message);
@@ -131,38 +133,37 @@ export default function DeliveryRouteForm({ routeId }: { routeId?: string }) {
     }
   }, [routeId]);
 
-  // Crear ruta
-  const onSubmit = async (values: z.infer<typeof RouteSchema>) => {
+  // Crear o actualizar ruta
+  const handleFormSubmit = async (values: z.infer<typeof RouteSchema>) => {
     setIsSubmitting(true);
     try {
-      const data = await createRoute(values);
+      let result;
 
-      if (data.error) {
-        showMessage("error", data.error);
+      // Si hay routeId, significa que es una actualización
+      if (routeId) {
+        result = await updateRoute(Number(routeId), values);
       } else {
+        // Si no hay routeId, intentamos buscar la ruta en la base de datos
+        const existingRoute = await findRoute(Number(values.id));
+
+        if (!existingRoute.success) {
+          // Si no existe en la base de datos, creamos una nueva ruta
+          result = await createRoute(values);
+        } else {
+          // Si existe en la base de datos, realizamos la actualización
+          result = await updateRoute(Number(existingRoute.data.id), values);
+        }
+      }
+
+      if (result.success) {
+        showMessage("success", result.message);
         reset();
-        showMessage("success", data.message);
-      }
-    } catch (err: any) {
-      showMessage("error", `Error al enviar el formulario. ${err.message}`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Actualizar ruta
-  const onUpdateRoute = async (values: z.infer<typeof RouteSchema>) => {
-    setIsSubmitting(true);
-    try {
-      const data = await updateRoute(Number(routeId), values);
-
-      if (data.error) {
-        showMessage("error", data.error);
+        setDate(undefined);
       } else {
-        showMessage("success", data.message);
+        showMessage("error", result.message);
       }
     } catch (err: any) {
-      showMessage("error", `Error al enviar el formulario. ${err.message}`);
+      showMessage("error", `Error al guardar la ruta. ${err.message || err}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -171,7 +172,9 @@ export default function DeliveryRouteForm({ routeId }: { routeId?: string }) {
   return (
     <Card className="w-full max-w-7xl mx-auto">
       <CardHeader>
-        <CardTitle>Formulario de Ruta de Delivery</CardTitle>
+        <CardTitle>
+          {routeId ? "Editar Ruta de Delivery" : "Crear Nueva Ruta de Delivery"}
+        </CardTitle>
         {!routeId && (
           <div className="flex items-center space-x-2 pt-2">
             <Input
@@ -208,12 +211,7 @@ export default function DeliveryRouteForm({ routeId }: { routeId?: string }) {
       </CardHeader>
 
       <CardContent>
-        <form
-          onSubmit={
-            routeId ? handleSubmit(onUpdateRoute) : handleSubmit(onSubmit)
-          }
-          className="space-y-6"
-        >
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Información de la Ruta</CardTitle>
@@ -224,7 +222,7 @@ export default function DeliveryRouteForm({ routeId }: { routeId?: string }) {
                 <Input
                   id="routeId"
                   {...register("id", { valueAsNumber: true })}
-                  disabled={!!routeId}
+                  disabled
                   placeholder="ID de la ruta"
                 />
                 {errors.id && (
@@ -274,7 +272,11 @@ export default function DeliveryRouteForm({ routeId }: { routeId?: string }) {
                       )}
                     >
                       <CalendarIcon />
-                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                      {date ? (
+                        format(date, "PPP")
+                      ) : (
+                        <span>Selecciona una fecha</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
