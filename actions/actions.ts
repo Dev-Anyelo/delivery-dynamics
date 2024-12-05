@@ -10,23 +10,26 @@ import { DRIVER_API_URL, ROUTE_API_URL } from "@/constants/constants";
 export const findRoute = async (routeId: number) => {
   try {
     const response = await axios.get(`${ROUTE_API_URL}/${routeId}`);
-    
-    if (response.data && response.data.data) {
+    const { data } = response;
+
+    if (data?.data) {
       return {
         success: true,
-        message: response.data.message,
-        data: response.data.data,
-      };
-    } else {
-      return {
-        success: false,
-        message: "Error al buscar la ruta",
+        message: data.message || "Ruta encontrada.",
+        data: data.data,
       };
     }
-  } catch (error: any) {
+
     return {
       success: false,
-      message: error.response?.data?.message || "Error al buscar la ruta",
+      message: "No se encontró la ruta.",
+    };
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Error al buscar la ruta.";
+    return {
+      success: false,
+      message: errorMessage,
     };
   }
 };
@@ -38,7 +41,7 @@ export const createRoute = async (data: z.infer<typeof RouteSchema>) => {
   if (!validateFields.success) {
     return {
       success: false,
-      error: "Los campos del formulario no son válidos.",
+      error: validateFields.error.errors.map((e) => e.message).join(", "),
     };
   }
 

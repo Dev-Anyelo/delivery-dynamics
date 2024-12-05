@@ -1,10 +1,6 @@
 export interface RouteData {
   id?: number;
   driverId: number;
-  driver: {
-    id: number;
-    name: string;
-  };
   date: string;
   notes: string | null;
   orders: {
@@ -13,4 +9,17 @@ export interface RouteData {
     value: number;
     priority: boolean;
   }[];
+}
+
+export interface DeliveryRouteFormProps {
+  routeId: string;
+  routeData: RouteData;
+}
+
+export interface FormErrorProps {
+  message?: string;
+}
+
+export interface FormSuccessProps {
+  message?: string;
 }

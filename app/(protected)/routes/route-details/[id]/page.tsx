@@ -1,9 +1,9 @@
 "use client";
 
 import { Loader } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import DeliveryRouteFormEdit from "@/components/delivery-route-form-edit";
+import { useEffect, useState } from "react";
+import DeliveryRouteForm from "@/components/delivery-route-form";
 
 const RouteDetailsPage = () => {
   const { id } = useParams();
@@ -14,7 +14,7 @@ const RouteDetailsPage = () => {
       setRouteId(id);
     }
   }, [id]);
-
+  
   if (!routeId) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -26,18 +26,7 @@ const RouteDetailsPage = () => {
     );
   }
 
-  return (
-    <>
-      <h1 className="scroll-m-10 text-2xl font-extrabold tracking-tight lg:text-3xl mx-auto">
-        Editar Ruta
-      </h1>
-
-      <p className="text-sm text-muted-foreground mx-auto">
-        Aquí puedes editar y ver los detalles la ruta seleccionada.
-      </p>
-      <DeliveryRouteFormEdit routeId={routeId} />
-    </>
-  );
+  return <DeliveryRouteForm routeId={routeId} />;
 };
 
 export default RouteDetailsPage;
