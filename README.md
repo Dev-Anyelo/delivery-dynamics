@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Delivery Dynamics - Technical Test
 
-## Getting Started
+Este repositorio contiene una aplicación full-stack desarrollada como parte de una prueba técnica para Delivery Dynamics. El proyecto está compuesto por un Frontend construido con React y Next.js, y un Backend utilizando Express.js, Prisma, y PostgreSQL.
 
-First, run the development server:
+## 📱 Frontend
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Lenguaje y Frameworks
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **TypeScript**: Un superconjunto de JavaScript que facilita el desarrollo mediante tipado estático, ayudando en la detección temprana de errores.
+- **React**: Biblioteca para construir interfaces de usuario eficientes a través de componentes reutilizables.
+- **Next.js**: Framework basado en React que optimiza el rendimiento, soporta renderizado del lado del servidor (SSR) y generación de sitios estáticos (SSG).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Estilos
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **CSS**: Utilizado para estilizar la aplicación globalmente o por componente.
+- **Tailwind CSS**: Framework utilitario de CSS para crear interfaces responsivas sin necesidad de escribir estilos adicionales. Usa clases predefinidas para aplicar estilos.
 
-## Learn More
+### UI y Componentes
 
-To learn more about Next.js, take a look at the following resources:
+- **Shadcn**: Librería de componentes UI para crear interfaces modernas y accesibles con diseño de alta calidad.
+- **Zod**: Librería de validación de esquemas en JavaScript/TypeScript, utilizada tanto en el frontend como en el backend para asegurar que los datos sean válidos antes de procesarlos.
+- **Axios**: Cliente HTTP para realizar solicitudes a servicios backend mediante API Rest (GET, POST, PUT, DELETE).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Levantamiento del Frontend
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Acceder a la carpeta frontend: `cd delivery-dynamics-frontend`
 
-## Deploy on Vercel
+2. Instalar dependencias:
+   ```bash
+   npm i
+   ```
+3. Ejecutar la aplicación:
+   ```bash
+   npm run dev
+   ```
+   Esto levantará el servidor de desarrollo en `http://localhost:3000`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Estructura de Carpetas
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/app`: Rutas y layout principal de la aplicación.
+- `/protected/`: Páginas protegidas que requieren autenticación.
+- `/actions`: Acciones para interactuar con el backend.
+- `/components`: Componentes UI reutilizables.
+- `/hooks`: Hooks personalizados de React.
+- `/lib`: Funciones utilitarias y librerías compartidas.
+- `/interfaces`: Interfaces TypeScript para describir la estructura de los datos.
+- `/public`: Archivos estáticos como imágenes y fuentes.
+- `/schemas`: Esquemas de validación de datos con Zod.
+- `/constants`: Constantes utilizadas en toda la aplicación.
+
+## 📦 Dependencias
+
+- **react**, **react-dom**: Librerías base para la construcción de la UI.
+- **next**: Framework para la creación de aplicaciones React optimizadas.
+- **tailwindcss**: Framework CSS para crear interfaces de usuario responsivas.
+- **shadcn**: Librería de componentes UI de alta calidad.
+- **axios**: Cliente HTTP para interactuar con APIs.
+- **zod**: Validación de esquemas de datos.
+
+### Repositorios
+
+Este proyecto está dividido en dos repositorios principales: uno para el **Frontend** y otro para el **Backend**.
+
+- **Frontend**: [delivery-dynamics](https://github.com/Dev-Anyelo/delivery-dynamics)  
+  El repositorio contiene la aplicación frontend, desarrollada con **React**, **Next.js** y **TypeScript**. Esta parte se encarga de la interfaz de usuario y la interacción con el backend.
+
+- **Backend**: [delivery-dynamics-backend](https://github.com/Dev-Anyelo/delivery-dynamics-back)  
+  El repositorio incluye el backend construido con \*
