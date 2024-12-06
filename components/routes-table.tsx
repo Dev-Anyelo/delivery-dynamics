@@ -56,7 +56,7 @@ export function RoutesTable() {
         </Button>
       ),
       cell: ({ row }) => (
-        <span>{row.original.driver?.name || "Desconocido"}</span>
+        <span>{row.original.driver.name || "Desconocido"}</span>
       ),
     },
     {
@@ -69,7 +69,6 @@ export function RoutesTable() {
       header: "Notas",
       cell: ({ row }) => <span>{row.getValue("notes") || "Sin notas"}</span>,
     },
-
     {
       accessorKey: "actions",
       header: "Acciones",
@@ -103,10 +102,10 @@ export function RoutesTable() {
     const loadRoutes = async () => {
       setLoading(true);
       try {
-        const { data, message } = await fetchRoutes();
-        setData(data);
+        const response = await fetchRoutes();
+        setData(response.routes);
         toast({
-          title: message,
+          title: response.message,
           variant: "default",
           description: "Se cargaron las rutas correctamente.",
         });
@@ -121,7 +120,7 @@ export function RoutesTable() {
       }
     };
     loadRoutes();
-  }, []);
+  }, [toast]);
 
   const handleDeleteRoute = async (routeId: number) => {
     if (routeId) {
@@ -159,7 +158,7 @@ export function RoutesTable() {
 
   const filteredData = React.useMemo(() => {
     return data.filter((route) =>
-      route.driver?.name.toLowerCase().includes(filter.toLowerCase())
+      route.driver.name.toLowerCase().includes(filter.toLowerCase())
     );
   }, [data, filter]);
 

@@ -48,19 +48,19 @@ import {
 
 import { FormError } from "./form-errors";
 import { FormSuccess } from "./form-success";
+import { Driver } from "@/interfaces/interfaces";
 
 const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [searchId, setSearchId] = useState<number | null>(null);
-
   const [message, setMessage] = useState<{
     type: "error" | "success";
     text: string;
   } | null>(null);
 
-  const [drivers, setDrivers] = useState<{ id: number; name: string }[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
 
   const formMethods = useForm<z.infer<typeof RouteSchema>>({
     resolver: zodResolver(RouteSchema),
@@ -81,17 +81,29 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
 
   const { handleSubmit, setValue, watch, reset, formState } = formMethods;
 
-  // Cargar datos de la ruta si se proporciona un ID mediante la URL
+  // Cargar conductores
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        const driversData = await getDrivers();
+        setDrivers(driversData);
+      } catch (error: any) {
+        setMessage({ type: "error", text: error.message });
+      }
+    };
+
+    fetchDrivers();
+  }, []);
+
+  // Cargar datos de la ruta si se proporciona un ID
   useEffect(() => {
     if (routeId) {
       const fetchRouteData = async () => {
         setIsLoading(true);
         try {
           const result = await findRoute(Number(routeId));
-
           if (result.success) {
             reset(result.data);
-            setValue("id", Number(result.data.id));
             setValue("driverId", result.data.driverId);
             setDate(new Date(result.data.date));
             setMessage({ type: "success", text: result.message });
@@ -122,17 +134,22 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
     setTimeout(() => setMessage(null), 5000);
   };
 
-  // Cargar conductores
-  const fetchDrivers = async () => {
-    try {
-      const response = await getDrivers();
-      setDrivers(response);
-    } catch (err) {
-      showMessage("error", "Error al cargar los conductores.");
-    }
-  };
-
   useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        const response = await getDrivers();
+        console.log("Conductores cargados:", response);
+        if (response.success) {
+          setDrivers(response.data);
+        } else {
+          showMessage("error", "No se encontraron conductores.");
+        }
+      } catch (err) {
+        console.error("Error fetching drivers:", err);
+        showMessage("error", "Error al cargar los conductores.");
+      }
+    };
+
     fetchDrivers();
   }, []);
 
@@ -180,9 +197,10 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
         ),
         "yyyy-MM-dd"
       );
-
       setDate(selectedDate);
       setValue("date", normalizedDate);
+    } else {
+      setDate(new Date());
     }
   };
 
@@ -242,10 +260,9 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
           {!routeId && (
             <div className="flex items-center space-x-2 pt-2">
               <Input
-                type="number"
                 className="flex-grow"
                 placeholder="Buscar ID de ruta"
-                value={searchId || ""}
+                value={Number(searchId) || ""}
                 onChange={(e) => setSearchId(Number(e.target.value) || null)}
                 disabled={isLoading || isSubmitting}
               />
@@ -276,7 +293,7 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
               <CardHeader>
                 <CardTitle>Información de la Ruta</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-wrap gap-4">
+              <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <FormField
                   name="id"
                   control={formMethods.control}
@@ -301,30 +318,45 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
                     <FormItem>
                       <FormLabel>Nombre del Conductor</FormLabel>
                       <FormControl>
-                        <Select
-                          value={field.value?.toString() || ""}
-                          onValueChange={(value) =>
-                            setValue("driverId", Number(value))
-                          }
-                          disabled={isLoading || isSubmitting}
-                        >
-                          <SelectTrigger>
-                            <SelectValue>
-                              {drivers?.find((d) => d.id === field.value)
-                                ?.name || "Selecciona un conductor"}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {drivers?.map((driver) => (
-                              <SelectItem
-                                key={driver.id}
-                                value={driver.id.toString()}
-                              >
-                                {driver.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        {drivers.length > 0 ? (
+                          <Select
+                            value={field.value?.toString() || ""}
+                            onValueChange={(value) =>
+                              setValue("driverId", Number(value))
+                            }
+                            disabled={isLoading || isSubmitting}
+                          >
+                            <SelectTrigger>
+                              <SelectValue>
+                                {(Array.isArray(drivers) &&
+                                  drivers.find((d) => d.id === field.value)
+                                    ?.name) ||
+                                  "Selecciona un conductor"}
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {drivers.map((driver) => (
+                                <SelectItem
+                                  key={driver.id}
+                                  value={driver.id.toString()}
+                                >
+                                  {driver.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Select disabled value=" ">
+                            <SelectTrigger>
+                              <SelectValue>
+                                <div className="flex items-center space-x-2">
+                                  <Loader className="size-4 animate-spin" />
+                                  <span>Cargando conductores</span>
+                                </div>
+                              </SelectValue>
+                            </SelectTrigger>
+                          </Select>
+                        )}
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -342,7 +374,7 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
                             <Button
                               variant={"outline"}
                               className={cn(
-                                "w-[280px] justify-start text-left font-normal",
+                                "w-full justify-start text-left font-normal",
                                 !date && "text-muted-foreground"
                               )}
                               disabled={isLoading || isSubmitting}
@@ -396,77 +428,93 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
               <CardHeader>
                 <CardTitle>Información de la Orden</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-wrap gap-4">
-                {watch("orders")?.map((_, index) => (
-                  <div key={index} className="flex gap-4">
-                    <FormField
-                      name={`orders.${index}.sequence`}
-                      control={formMethods.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Secuencia</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              type="number"
-                              value={field.value ? field.value : ""}
-                              onChange={(e) =>
-                                field.onChange(Number(e.target.value))
-                              }
-                              disabled={isLoading || isSubmitting}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      name={`orders.${index}.value`}
-                      control={formMethods.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Valor $</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              type="number"
-                              value={field.value ? field.value : ""}
-                              onChange={(e) =>
-                                field.onChange(Number(e.target.value))
-                              }
-                              disabled={isLoading || isSubmitting}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      name={`orders.${index}.priority`}
-                      control={formMethods.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <div className="flex items-center justify-center gap-x-3">
+              <CardContent
+                className={
+                  `w-full ${
+                    isLoading
+                      ? "flex justify-center items-center"
+                      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                  } ` + (isLoading ? "opacity-50" : "")
+                }
+              >
+                {isLoading ? (
+                  <div className="flex justify-center items-center space-x-2">
+                    <Loader className="size-4 animate-spin" />
+                    <span>Cargando Ordenes</span>
+                  </div>
+                ) : (
+                  watch("orders")?.map((_, index) => (
+                    <div key={index} className="flex gap-3 flex-wrap mb-4">
+                      <FormField
+                        name={`orders.${index}.sequence`}
+                        control={formMethods.control}
+                        render={({ field }) => (
+                          <FormItem className="w-full sm:w-1/3">
+                            <FormLabel>Secuencia</FormLabel>
                             <FormControl>
-                              <Switch
-                                id={`orders.${index}.priority`}
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
+                              <Input
+                                {...field}
+                                type="number"
+                                value={field.value ? field.value : ""}
+                                onChange={(e) =>
+                                  field.onChange(Number(e.target.value))
+                                }
                                 disabled={isLoading || isSubmitting}
                               />
                             </FormControl>
-                            <FormLabel htmlFor={`orders.${index}.priority`}>
-                              Prioritaria
-                            </FormLabel>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                ))}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        name={`orders.${index}.value`}
+                        control={formMethods.control}
+                        render={({ field }) => (
+                          <FormItem className="w-full sm:w-1/3">
+                            <FormLabel>Valor $</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="number"
+                                value={field.value ? field.value : ""}
+                                onChange={(e) =>
+                                  field.onChange(Number(e.target.value))
+                                }
+                                disabled={isLoading || isSubmitting}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        name={`orders.${index}.priority`}
+                        control={formMethods.control}
+                        render={({ field }) => (
+                          <FormItem className="w-full sm:w-1/3">
+                            <div className="flex items-center justify-between gap-x-3">
+                              <FormControl>
+                                <Switch
+                                  id={`orders.${index}.priority`}
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  disabled={isLoading || isSubmitting}
+                                />
+                              </FormControl>
+                              <FormLabel htmlFor={`orders.${index}.priority`}>
+                                Prioritaria
+                              </FormLabel>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  ))
+                )}
               </CardContent>
             </Card>
+
             <Button className="w-full" type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <Loader className="w-6 h-6 animate-spin" />
