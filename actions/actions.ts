@@ -2,9 +2,15 @@
 
 import * as z from "zod";
 import axios from "axios";
-import { RouteSchema } from "@/schemas/schemas";
-import { DRIVER_API_URL, ROUTE_API_URL } from "@/constants/constants";
-import { DriverResponse, RouteResponse } from "@/interfaces/interfaces";
+import { PlansSchema, RouteSchema } from "@/schemas/schemas";
+import { RouteResponse } from "@/interfaces/interfaces";
+import {
+  DRIVER_API_URL,
+  PLANS_API_URL,
+  ROUTE_API_URL,
+} from "@/constants/constants";
+
+// --------- ROUTES --------- //
 
 // Buscar una ruta por ID
 export const findRoute = async (routeId: number) => {
@@ -128,7 +134,6 @@ export const updateRoute = async (
   }
 };
 
-// Eliminar una ruta por ID
 export const deleteRoute = async (routeId: number) => {
   try {
     const { data: responseData } = await axios.delete(
@@ -150,7 +155,7 @@ export const deleteRoute = async (routeId: number) => {
   }
 };
 
-// Obtener Conductores
+// TODO: Obtener Conductores from API
 export const getDrivers = async () => {
   try {
     const response = await axios.get(DRIVER_API_URL);
@@ -160,5 +165,57 @@ export const getDrivers = async () => {
       ? error.response?.data?.message || "Error al cargar los conductores."
       : "Error inesperado al cargar los conductores.";
     throw new Error(errorMessage);
+  }
+};
+
+// --------- GUIDES (PLANS) --------- //
+
+// Buscar una ruta por ID
+export const fetchGuideById = async (guideId: number) => {
+  try {
+    const { data } = await axios.get(`${PLANS_API_URL}/${guideId}`);
+
+    if (data?.data) {
+      return {
+        success: true,
+        message: data.message || "Guía encontrada.",
+        data: data.data,
+      };
+    }
+
+    return {
+      success: false,
+      message: "No se encontró la guía.",
+    };
+  } catch (error) {
+    const errorMessage = axios.isAxiosError(error)
+      ? error.response?.data?.message || "Error al buscar la guía."
+      : "Error inesperado al buscar la guía.";
+
+    return {
+      success: false,
+      message: errorMessage,
+    };
+  }
+};
+
+// Obtener todas las rutas
+export const fetchAllGuides = async (
+  date: string,
+  assignedUserId: string
+): Promise<z.infer<typeof PlansSchema>> => {
+  try {
+    const { data } = await axios.get(
+      `${PLANS_API_URL}?date=${date}&assignedUserId=${assignedUserId}`
+    );
+    console.log("Datos recibidos:", data);
+
+    if (!data || !data.data) {
+      throw new Error("No se encontraron guías");
+    }
+    return data.data;
+  } catch (error: any) {
+    console.error("Error al cargar las guías:", error);
+    throw new Error(error.response?.data?.message || "Error desconocido");
   }
 };

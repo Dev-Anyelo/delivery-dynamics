@@ -60,7 +60,7 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
     text: string;
   } | null>(null);
 
-  const [drivers, setDrivers] = useState<Driver[]>([]);
+  // const [drivers, setDrivers] = useState<Driver[]>([]);
 
   const formMethods = useForm<z.infer<typeof RouteSchema>>({
     resolver: zodResolver(RouteSchema),
@@ -82,18 +82,18 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
   const { handleSubmit, setValue, watch, reset, formState } = formMethods;
 
   // Cargar conductores
-  useEffect(() => {
-    const fetchDrivers = async () => {
-      try {
-        const driversData = await getDrivers();
-        setDrivers(driversData);
-      } catch (error: any) {
-        setMessage({ type: "error", text: error.message });
-      }
-    };
+  // useEffect(() => {
+  //   const fetchDrivers = async () => {
+  //     try {
+  //       const driversData = await getDrivers();
+  //       setDrivers(driversData);
+  //     } catch (error: any) {
+  //       setMessage({ type: "error", text: error.message });
+  //     }
+  //   };
 
-    fetchDrivers();
-  }, []);
+  //   fetchDrivers();
+  // }, []);
 
   // Cargar datos de la ruta si se proporciona un ID
   useEffect(() => {
@@ -134,24 +134,24 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
     setTimeout(() => setMessage(null), 5000);
   };
 
-  useEffect(() => {
-    const fetchDrivers = async () => {
-      try {
-        const response = await getDrivers();
-        console.log("Conductores cargados:", response);
-        if (response.success) {
-          setDrivers(response.data);
-        } else {
-          showMessage("error", "No se encontraron conductores.");
-        }
-      } catch (err) {
-        console.error("Error fetching drivers:", err);
-        showMessage("error", "Error al cargar los conductores.");
-      }
-    };
+  // useEffect(() => {
+  //   const fetchDrivers = async () => {
+  //     try {
+  //       const response = await getDrivers();
+  //       console.log("Conductores cargados:", response);
+  //       if (response.success) {
+  //         setDrivers(response.data);
+  //       } else {
+  //         showMessage("error", "No se encontraron conductores.");
+  //       }
+  //     } catch (err) {
+  //       console.error("Error fetching drivers:", err);
+  //       showMessage("error", "Error al cargar los conductores.");
+  //     }
+  //   };
 
-    fetchDrivers();
-  }, []);
+  //   fetchDrivers();
+  // }, []);
 
   // Buscar ruta por ID
   const onSearchRoute = async () => {
@@ -250,7 +250,7 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
 
   return (
     <FormProvider {...formMethods}>
-      <Card className="w-full max-w-7xl mx-auto">
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>
             {routeId
@@ -318,7 +318,7 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
                     <FormItem>
                       <FormLabel>Nombre del Conductor</FormLabel>
                       <FormControl>
-                        {drivers.length > 0 ? (
+                        {/* {drivers.length > 0 ? ( */}
                           <Select
                             value={field.value?.toString() || ""}
                             onValueChange={(value) =>
@@ -328,24 +328,26 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
                           >
                             <SelectTrigger>
                               <SelectValue>
-                                {(Array.isArray(drivers) &&
+                                {/* {(Array.isArray(drivers) &&
                                   drivers.find((d) => d.id === field.value)
                                     ?.name) ||
-                                  "Selecciona un conductor"}
+                                  "Selecciona un conductor"} */}
+                                Selecciona un conductor
                               </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
-                              {drivers.map((driver) => (
+                              {/* {drivers.map((driver) => (
                                 <SelectItem
                                   key={driver.id}
                                   value={driver.id.toString()}
                                 >
                                   {driver.name}
                                 </SelectItem>
-                              ))}
+                              ))} */}
+                              Anyelo Benavides
                             </SelectContent>
                           </Select>
-                        ) : (
+                        {/* ) : (
                           <Select disabled value=" ">
                             <SelectTrigger>
                               <SelectValue>
@@ -356,7 +358,7 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
                               </SelectValue>
                             </SelectTrigger>
                           </Select>
-                        )}
+                        )} */}
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -405,7 +407,7 @@ const DeliveryRouteForm = ({ routeId }: { routeId?: string }) => {
                   name="notes"
                   control={formMethods.control}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="col-span-3">
                       <FormLabel>Notas</FormLabel>
                       <FormControl>
                         <Textarea

@@ -1,23 +1,38 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/ui/toggle-theme";
 
 export default function Home() {
+  const router = useRouter();
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start text-center sm:text-left">
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-          Bienvenido a <span className="text-blue-600">Delivery Dynamics</span>
+    <div className="relative h-screen flex items-center justify-center overflow-hidden">
+      <video
+        autoPlay
+        loop
+        muted
+        className="absolute z-0 w-auto min-w-full min-h-full max-w-none opacity-40"
+      >
+        <source src="/hero.mp4" type="video/mp4" />
+      </video>
+
+      <div className="absolute inset-0 bg-black/50"></div>
+
+      <div className="z-10 text-center text-foreground space-y-4">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl max-w-4xl text-balance text-center">
+          Bienvenido a Delivery Dynamics
         </h1>
-        <div className="w-full flex justify-center items-center  gap-x-5 flex-wrap">
-          <Link href="/routes">
-            <Button>Dashboard</Button>
-          </Link>
-          <ModeToggle />
-        </div>
-      </main>
+        <p className="text-xl md:text-2xl mb-8 max-w-xl mx-auto text-balance text-center">
+          Inicia sesión para continuar
+        </p>
+        <Button
+          onClick={() => router.push("/auth/login")}
+          className="px-6 py-2 rounded-lg"
+        >
+          Empezar <ArrowUpRight />
+        </Button>
+      </div>
     </div>
   );
 }

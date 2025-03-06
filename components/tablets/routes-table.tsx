@@ -2,23 +2,14 @@
 
 import Link from "next/link";
 import * as React from "react";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { fetchRoutes } from "@/actions/actions";
 import { deleteRoute } from "@/actions/actions";
-import { Loader, Trash, Edit } from "lucide-react";
 import { RouteData } from "@/interfaces/interfaces";
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
+import { Loader, Trash, Edit, Search } from "lucide-react";
 
 import {
   ColumnDef,
@@ -32,6 +23,15 @@ import {
   useReactTable,
   flexRender,
 } from "@tanstack/react-table";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 
 export function RoutesTable() {
   const { toast } = useToast();
@@ -190,24 +190,26 @@ export function RoutesTable() {
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4 pt-6">
       {/* Filtro */}
       <Label htmlFor="filter">Buscar por conductor</Label>
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Buscar por nombre del conductor..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="max-w-sm"
-        />
+      <div className="flex items-center">
+        <div className="relative max-w-sm w-full">
+          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <Input
+            placeholder="Buscar por nombre del conductor"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="pl-8 max-w-sm"
+          />
+        </div>
       </div>
 
       {/* Carga o tabla */}
       <div className="rounded-md border">
         {loading ? (
           <div className="flex justify-center items-center py-4">
-            <Loader className="mr-2 animate-spin size-4" />
-            <span className="text-gray-400">Cargando rutas...</span>
+            <Loader className="animate-spin size-4" />
           </div>
         ) : (
           <Table>

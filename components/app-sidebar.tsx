@@ -1,23 +1,12 @@
 "use client";
 
 import * as React from "react";
-import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  PackageCheck,
-  Map,
-  PieChart,
-  Settings2,
-  RouteIcon,
-} from "lucide-react";
-
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
+// import { NavProjects } from "@/components/nav-projects";
 import { TeamSwitcher } from "@/components/team-switcher";
+import { PackageCheck, Map, RouteIcon } from "lucide-react";
+
 import {
   Sidebar,
   SidebarContent,
@@ -26,12 +15,11 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-// This is sample data.
 const data = {
   user: {
     name: "Anyelo Benavides",
     email: "anyelobg.dev@gmail.com",
-    avatar: "/yo.jpg",
+    avatar: "",
   },
   teams: [
     {
@@ -39,21 +27,11 @@ const data = {
       logo: PackageCheck,
       plan: "Enterprise",
     },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
   ],
   navMain: [
     {
       title: "Rutas",
-      url: "#",
+      url: "/routes",
       icon: RouteIcon,
       isActive: true,
       items: [
@@ -65,10 +43,21 @@ const data = {
           title: "Agregar nueva Ruta",
           url: "/routes/add-route",
         },
-        // {
-        //   title: "Manage Routes",
-        //   url: "/routes/manage",
-        // },
+      ],
+    },
+    {
+      title: "Guías",
+      url: "/guides",
+      icon: Map,
+      items: [
+        {
+          title: "Todas las Guías",
+          url: "/guides",
+        },
+        {
+          title: "Agregar nueva Guía",
+          url: "/guides/add-guide",
+        },
       ],
     },
   ],
