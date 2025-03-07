@@ -9,6 +9,7 @@ import {
   PLANS_API_URL,
   ROUTE_API_URL,
 } from "@/constants/constants";
+import { Stringifier } from "postcss";
 
 // --------- ROUTES --------- //
 
@@ -171,7 +172,7 @@ export const getDrivers = async () => {
 // --------- GUIDES (PLANS) --------- //
 
 // Buscar una ruta por ID
-export const fetchGuideById = async (guideId: number) => {
+export const fetchGuideById = async (guideId: string) => {
   try {
     const { data } = await axios.get(`${PLANS_API_URL}/${guideId}`);
 
@@ -203,19 +204,23 @@ export const fetchGuideById = async (guideId: number) => {
 export const fetchAllGuides = async (
   date: string,
   assignedUserId: string
-): Promise<z.infer<typeof PlansSchema>> => {
+): Promise<{ data?: any; message: string; success: boolean }> => {
   try {
-    const { data } = await axios.get(
+    const response = await axios.get(
       `${PLANS_API_URL}?date=${date}&assignedUserId=${assignedUserId}`
     );
-    console.log("Datos recibidos:", data);
 
-    if (!data || !data.data) {
-      throw new Error("No se encontraron guías");
-    }
-    return data.data;
+    return {
+      success: response.data.success,
+      message: response.data.message,
+      data: response.data.data,
+    };
   } catch (error: any) {
     console.error("Error al cargar las guías:", error);
-    throw new Error(error.response?.data?.message || "Error desconocido");
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error desconocido",
+      data: null,
+    };
   }
 };

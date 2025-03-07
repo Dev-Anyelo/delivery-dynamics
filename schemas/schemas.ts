@@ -50,6 +50,10 @@ export const FilterGuidesSchema = z.object({
   }),
 });
 
+export const SearchGuideSchema = z.object({
+  guideSearchID: z.string(),
+});
+
 export const ReasonSchema = z.object({
   id: z.string(),
   labelEn: z.string(),
@@ -216,7 +220,7 @@ export const OrderSchema: z.ZodType<any> = z.object({
   requiresSignature: z.boolean(),
   actualValue: z.number(),
   notes: z.string().optional(),
-  status: z.string().nullable(),
+  status: OrderStatus,
   statusConfirmed: z.boolean().nullable(),
   statusTimestamp: z.coerce.date().optional().nullable(),
   deliveryVisitId: z.string().optional(),

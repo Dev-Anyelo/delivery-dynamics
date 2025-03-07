@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Toaster } from "sonner";
 import { usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -62,6 +63,7 @@ export default function DashboardLayout({
         <main className="flex-1 overflow-y-hidden dark:bg-[#0a0908] px-6">
           {children}
         </main>
+        <Toaster position="top-center" closeButton theme="system" richColors />
       </SidebarInset>
     </SidebarProvider>
   );
