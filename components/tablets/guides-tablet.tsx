@@ -8,7 +8,9 @@ import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
+import OrderCards from "../ui/order-cards";
 import VisitCards from "../ui/visit-cards";
+import { TooltipProvider } from "../ui/tooltip";
 import { Alert, AlertDescription } from "../ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
@@ -18,17 +20,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { fetchAllGuides, deleteRoute, fetchGuideById } from "@/actions/actions";
 
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
-
-import {
   PlanSchema,
   FilterGuidesSchema,
   SearchGuideSchema,
-  VisitSchema,
+  OperationType,
+  PointOfInterestType,
 } from "@/schemas/schemas";
 
 import {
@@ -51,7 +47,6 @@ import {
   Copy,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   ArrowUpRight,
   Filter,
   Plus,
@@ -61,6 +56,9 @@ import {
   FileStack,
   Trash2,
   AlertCircle,
+  Truck,
+  ShoppingCart,
+  Building,
 } from "lucide-react";
 
 import {
@@ -152,7 +150,7 @@ export function GuidesTable() {
     resolver: zodResolver(FilterGuidesSchema),
     defaultValues: {
       assignedUserId: "",
-      date: new Date(),
+      date: new Date("2018-01-24"),
     },
   });
 
@@ -169,47 +167,47 @@ export function GuidesTable() {
       // Columna ID
       {
         accessorKey: "id",
-        header: ({ column }) => (
-          <div className="flex items-center space-x-1 justify-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="-ml-3 h-8 data-[state=open]:bg-accent"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              <span>ID</span>
-            </Button>
-          </div>
-        ),
+        header: "ID",
         cell: ({ row }) => (
           <span className="font-medium">{row.getValue("id")}</span>
+        ),
+      },
+      {
+        accessorKey: "operationType",
+        header: "Tipo de operación",
+        cell: ({ row }) => (
+          <Badge
+            variant="outline"
+            className={`rounded-full font-semibold ${
+              row.getValue("operationType") === OperationType.Values.delivery
+                ? "bg-blue-500/15 text-blue-500"
+                : "bg-emerald-500/15 text-emerald-500"
+            }`}
+          >
+            {row.getValue("operationType") === OperationType.Values.delivery ? (
+              <>
+                <Truck className="mr-1 size-4" />
+                Entrega
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="mr-1 size-3" />
+                Ventas
+              </>
+            )}
+          </Badge>
         ),
       },
 
       // Columna Conductor ID
       {
         accessorKey: "assignedUserId",
-        header: ({ column }) => (
-          <div className="flex items-center space-x-1 justify-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="-ml-3 h-8 data-[state=open]:bg-accent text-center"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              <span>Conductor ID</span>
-            </Button>
-          </div>
-        ),
+        header: "Conductor",
         cell: ({ row }) => (
           <div className="flex justify-center items-center gap-2">
             <Badge
               variant="outline"
-              className="rounded-full text-primary font-semibold bg-emerald-500/15 text-emerald-500 transition-all duration-500"
+              className="rounded-full text-primary font-semibold bg-emerald-500/15 text-emerald-500"
             >
               {row.original.assignedUserId || "—"}
             </Badge>
@@ -217,23 +215,84 @@ export function GuidesTable() {
         ),
       },
 
+      {
+        accessorKey: "startPoint",
+        header: "Punto de partida",
+        cell: ({ row }) => {
+          const { address, type } = row.original.startPoint as {
+            address: string;
+            type: keyof typeof typeMapping;
+          };
+
+          const typeMapping = {
+            [PointOfInterestType.Values.distribution_center]: {
+              label: "Centro de distribución",
+            },
+            [PointOfInterestType.Values.store]: {
+              label: "Tienda",
+            },
+            [PointOfInterestType.Values.warehouse]: {
+              label: "Almacén",
+            },
+            [PointOfInterestType.Values.headquarters]: {
+              label: "Sede",
+            },
+          };
+
+          return (
+            <div className="flex flex-col items-start gap-1 text-sm">
+              <span className="font-medium text-primary">{address}</span>
+              {typeMapping[type as keyof typeof typeMapping] && (
+                <span className="flex items-center text-muted-foreground">
+                  {typeMapping[type as keyof typeof typeMapping].label}
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+
+      {
+        accessorKey: "endPoint",
+        header: "Punto de llegada",
+        cell: ({ row }) => {
+          const { address, type } = row.original.endPoint as {
+            address: string;
+            type: keyof typeof typeMapping;
+          };
+
+          const typeMapping = {
+            [PointOfInterestType.Values.distribution_center]: {
+              label: "Centro de distribución",
+            },
+            [PointOfInterestType.Values.store]: {
+              label: "Tienda",
+            },
+            [PointOfInterestType.Values.warehouse]: {
+              label: "Almacén",
+            },
+            [PointOfInterestType.Values.headquarters]: {
+              label: "Sede",
+            },
+          };
+
+          return (
+            <div className="flex flex-col items-start gap-1 text-sm">
+              <span className="font-medium text-primary">{address}</span>
+              {typeMapping[type as keyof typeof typeMapping] && (
+                <span className="flex items-center text-muted-foreground">
+                  {typeMapping[type as keyof typeof typeMapping].label}
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+
       // Columna Fecha
       {
         accessorKey: "date",
-        header: ({ column }) => (
-          <div className="flex space-x-1 justify-center items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="-ml-3 h-8 data-[state=open]:bg-accent"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              <span>Fecha</span>
-            </Button>
-          </div>
-        ),
+        header: "Fecha",
         cell: ({ row }) => {
           const date = new Date(row.original.date);
           return (
@@ -248,7 +307,7 @@ export function GuidesTable() {
         },
       },
 
-      // Columna Visitas (con diálogo para ver detalles)
+      // Columna Visitas (con diálogo para ver visitas)
       {
         accessorKey: "visits",
         header: "Visitas",
@@ -262,7 +321,8 @@ export function GuidesTable() {
                   size="sm"
                   className="bg-primary/10 text-primary font-semibold hover:bg-blue-500/15 hover:text-blue-500 transition-all duration-500"
                 >
-                  {visits.length} visita{visits.length !== 1 && "s"}
+                  {visits.length} visita{visits.length !== 1 && "s"}{" "}
+                  <ArrowUpRight className="size-4 inline" />
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-[90vw] sm:max-w-[80vw] lg:max-w-[70vw] xl:max-w-[1200px] 2xl:max-w-[1300px] flex flex-col  h-[80vh] sm:h-[70vh] lg:h-[60vh] xl:h-[70vh] 2xl:h-[90vh] overflow-hidden">
@@ -299,20 +359,6 @@ export function GuidesTable() {
             </Dialog>
           );
         },
-      },
-
-      // Columna Órdenes
-      {
-        accessorKey: "orders",
-        header: "Órdenes",
-        cell: ({ row }) => (
-          <Badge
-            variant="outline"
-            className="rounded-full text-primary font-semibold bg-blue-500/15 text-blue-500 transition-all duration-500"
-          >
-            {row.original.orders?.length || 0} órdenes
-          </Badge>
-        ),
       },
 
       // Columna Fechas activas

@@ -245,7 +245,7 @@ export const VisitSchema: z.ZodType<any> = z.object({
   customer: z.lazy(() => CustomerSchema),
   addressId: z.string(),
   address: z.lazy(() => AddressSchema),
-  deliveryOrders: z.array(z.lazy(() => OrderSchema)).optional(),
+  orders: z.array(z.lazy(() => OrderSchema)).optional(),
   pickupOrders: z.array(z.lazy(() => OrderSchema)).optional(),
   paymentMethods: z.array(z.lazy(() => PaymentMethodSchema)).optional(),
   reassignedDeliveries: z
