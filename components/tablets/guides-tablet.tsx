@@ -8,10 +8,13 @@ import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
-import { ScrollArea } from "../ui/scroll-area";
+import VisitCards from "../ui/visit-cards";
+import { Alert, AlertDescription } from "../ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 import { FormField, FormItem } from "@/components/ui/form";
+import { RowsTableSkeletons } from "../skeletons/dashboard-skeletons";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { fetchAllGuides, deleteRoute, fetchGuideById } from "@/actions/actions";
 
 import {
@@ -25,11 +28,22 @@ import {
   PlanSchema,
   FilterGuidesSchema,
   SearchGuideSchema,
+  VisitSchema,
 } from "@/schemas/schemas";
 
 import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+import {
   Loader,
-  Trash,
   Edit,
   Search,
   CalendarIcon,
@@ -37,7 +51,6 @@ import {
   Copy,
   ChevronLeft,
   ChevronRight,
-  Columns,
   ChevronDown,
   ArrowUpRight,
   Filter,
@@ -46,6 +59,8 @@ import {
   SlidersHorizontal,
   RefreshCcw,
   FileStack,
+  Trash2,
+  AlertCircle,
 } from "lucide-react";
 
 import {
@@ -85,6 +100,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+
 import {
   Card,
   CardContent,
@@ -93,8 +109,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { RowsTableSkeletons } from "../skeletons/dashboard-skeletons";
+
 import {
   Select,
   SelectContent,
@@ -102,6 +117,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 export function GuidesTable() {
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -139,10 +166,11 @@ export function GuidesTable() {
   // Table columns definition
   const columns: ColumnDef<z.infer<typeof PlanSchema>>[] = React.useMemo(
     () => [
+      // Columna ID
       {
         accessorKey: "id",
         header: ({ column }) => (
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 justify-center">
             <Button
               variant="ghost"
               size="sm"
@@ -152,7 +180,6 @@ export function GuidesTable() {
               }
             >
               <span>ID</span>
-              <ChevronDown className="ml-1 size-4" />
             </Button>
           </div>
         ),
@@ -160,35 +187,41 @@ export function GuidesTable() {
           <span className="font-medium">{row.getValue("id")}</span>
         ),
       },
+
+      // Columna Conductor ID
       {
         accessorKey: "assignedUserId",
         header: ({ column }) => (
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 justify-center">
             <Button
               variant="ghost"
               size="sm"
-              className="-ml-3 h-8 data-[state=open]:bg-accent"
+              className="-ml-3 h-8 data-[state=open]:bg-accent text-center"
               onClick={() =>
                 column.toggleSorting(column.getIsSorted() === "asc")
               }
             >
-              <span>Conductor</span>
-              <ChevronDown className="ml-1 size-4" />
+              <span>Conductor ID</span>
             </Button>
           </div>
         ),
         cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="rounded-full">
+          <div className="flex justify-center items-center gap-2">
+            <Badge
+              variant="outline"
+              className="rounded-full text-primary font-semibold bg-emerald-500/15 text-emerald-500 transition-all duration-500"
+            >
               {row.original.assignedUserId || "—"}
             </Badge>
           </div>
         ),
       },
+
+      // Columna Fecha
       {
         accessorKey: "date",
         header: ({ column }) => (
-          <div className="flex items-center space-x-1">
+          <div className="flex space-x-1 justify-center items-center">
             <Button
               variant="ghost"
               size="sm"
@@ -198,108 +231,125 @@ export function GuidesTable() {
               }
             >
               <span>Fecha</span>
-              <ChevronDown className="ml-1 size-4" />
             </Button>
           </div>
         ),
         cell: ({ row }) => {
           const date = new Date(row.original.date);
           return (
-            <div className="flex flex-col">
+            <div className="flex flex-col justify-center items-center">
               <span className="font-medium">
                 {new Intl.DateTimeFormat("es-ES", {
                   dateStyle: "medium",
-                }).format(date)}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {new Intl.DateTimeFormat("es-ES", {
-                  timeStyle: "short",
                 }).format(date)}
               </span>
             </div>
           );
         },
       },
+
+      // Columna Visitas (con diálogo para ver detalles)
       {
         accessorKey: "visits",
         header: "Visitas",
-        cell: ({ row }) => (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="secondary" className="cursor-help">
-                  {row.original.visits?.length || 0} visitas
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="max-w-sm">
-                <ScrollArea className="h-[200px] w-[300px] rounded-md border p-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Detalles de visitas</h4>
-                    {row.original.visits?.length ? (
-                      <ul className="space-y-2">
-                        {row.original.visits?.map(
-                          (visit: any, index: number) => (
-                            <li
-                              key={index}
-                              className="border-b pb-2 last:border-0"
-                            >
-                              <div className="font-medium">{visit.address}</div>
-                              <div className="text-sm text-muted-foreground">
-                                Estado: {visit.status}
-                              </div>
-                            </li>
-                          )
-                        )}
-                      </ul>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        No hay visitas programadas
-                      </p>
-                    )}
-                  </div>
-                </ScrollArea>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ),
-      },
-      {
-        accessorKey: "truck",
-        header: "Vehículo",
-        cell: ({ row }) => (
-          <Badge variant="outline">
-            {row.original.truck?.id || "No asignado"}
-          </Badge>
-        ),
-      },
-      {
-        accessorKey: "status",
-        header: "Estado",
         cell: ({ row }) => {
-          const status = row.original.actualEndTimestamp
-            ? "Completado"
-            : "En progreso";
+          const visits = row.original.visits || [];
           return (
-            <Badge
-              className={
-                status === "Completado"
-                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
-                  : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
-              }
-            >
-              {status}
-            </Badge>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="bg-primary/10 text-primary font-semibold hover:bg-blue-500/15 hover:text-blue-500 transition-all duration-500"
+                >
+                  {visits.length} visita{visits.length !== 1 && "s"}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-[90vw] sm:max-w-[80vw] lg:max-w-[70vw] xl:max-w-[1200px] 2xl:max-w-[1300px] flex flex-col  h-[80vh] sm:h-[70vh] lg:h-[60vh] xl:h-[70vh] 2xl:h-[90vh] overflow-hidden">
+                <DialogHeader>
+                  <DialogTitle>Detalles de Visitas</DialogTitle>
+                  <DialogDescription className="text-sm dark:text-gray-500 text-neutral-700">
+                    Información detallada de las visitas del plan.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col flex-1 overflow-y-auto relative p-4">
+                  {visits && visits.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <VisitCards visits={visits} />
+                    </div>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Alert variant="default" className="h-12 w-fit">
+                        <AlertDescription>
+                          <AlertCircle className="size-4 inline mr-2" />
+                          No se encontraron visitas para este plan.
+                        </AlertDescription>
+                      </Alert>
+                    </div>
+                  )}
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="default" size="sm">
+                      Cerrar
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           );
         },
       },
+
+      // Columna Órdenes
+      {
+        accessorKey: "orders",
+        header: "Órdenes",
+        cell: ({ row }) => (
+          <Badge
+            variant="outline"
+            className="rounded-full text-primary font-semibold bg-blue-500/15 text-blue-500 transition-all duration-500"
+          >
+            {row.original.orders?.length || 0} órdenes
+          </Badge>
+        ),
+      },
+
+      // Columna Fechas activas
+      {
+        accessorKey: "activeDates",
+        header: "Fechas activas",
+        cell: ({ row }) => {
+          const activeDates = row.original.activeDates || [];
+          return (
+            <div className="flex flex-col space-y-1">
+              {activeDates.length > 0 ? (
+                activeDates.map((date: string, index: number) => (
+                  <span key={index} className="text-xs text-muted-foreground">
+                    {new Intl.DateTimeFormat("es-ES", {
+                      dateStyle: "medium",
+                    }).format(new Date(date))}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-muted-foreground">
+                  Sin fechas activas
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+
+      // Columna Acciones
       {
         id: "actions",
         enableHiding: false,
-        header: "",
+        header: "Acciones",
         cell: ({ row }) => {
           const guide = row.original as z.infer<typeof PlanSchema>;
           return (
-            <div className="flex justify-end">
+            <div className="flex justify-center items-center">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -315,18 +365,43 @@ export function GuidesTable() {
                       href={`/guides/guides-details/${guide.id}`}
                       className="flex items-center cursor-pointer"
                     >
-                      <Edit className="mr-2 size-4" /> Ver detalles
+                      <Edit className="mr-2 size-4" /> Detalles
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleCopy}>
-                    <Copy className="mr-2 size-4" /> Copiar información
+                  <DropdownMenuItem
+                    disabled={isCopied || !guide.id}
+                    onClick={handleCopy}
+                    className="flex items-center cursor-pointer"
+                  >
+                    <Copy className="mr-2 size-4" /> Copiar
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => handleDeleteGuide(guide.id)}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash className="mr-2 size-4" /> Eliminar
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <span className="flex justify-center items-center gap-2">
+                          <Trash2 className="size-4" /> Eliminar
+                        </span>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Eliminar historial de mantenimiento
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            ¿Estás seguro de que deseas eliminar esta guía?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteGuide(guide.id)}
+                          >
+                            Continuar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -820,7 +895,7 @@ export function GuidesTable() {
                       {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
                           {headerGroup.headers.map((header) => (
-                            <TableHead key={header.id}>
+                            <TableHead key={header.id} className="text-center">
                               {header.isPlaceholder
                                 ? null
                                 : flexRender(
@@ -840,10 +915,10 @@ export function GuidesTable() {
                           <TableRow
                             key={row.id}
                             data-state={row.getIsSelected() && "selected"}
-                            className="group"
+                            className="group text-center"
                           >
                             {row.getVisibleCells().map((cell) => (
-                              <TableCell key={cell.id}>
+                              <TableCell key={cell.id} className="text-center">
                                 {flexRender(
                                   cell.column.columnDef.cell,
                                   cell.getContext()
@@ -1058,16 +1133,6 @@ export function GuidesTable() {
                 {table.getPageCount()}
               </div>
               <div className="flex items-center space-x-2">
-                {/* <Button
-                  variant="outline"
-                  className="hidden h-8 w-8 p-0 lg:flex"
-                  onClick={() => table.setPageIndex(0)}
-                  disabled={!table.getCanPreviousPage()}
-                >
-                  <span className="sr-only">Ir a la primera página</span>
-                  <ChevronLeft className="size-4" />
-                  <ChevronLeft className="size-4" />
-                </Button> */}
                 <Button
                   variant="outline"
                   className="h-8 w-8 p-0"
@@ -1086,16 +1151,6 @@ export function GuidesTable() {
                   <span className="sr-only">Ir a la página siguiente</span>
                   <ChevronRight className="size-4" />
                 </Button>
-                {/* <Button
-                  variant="outline"
-                  className="hidden h-8 w-8 p-0 lg:flex"
-                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                  disabled={!table.getCanNextPage()}
-                >
-                  <span className="sr-only">Ir a la última página</span>
-                  <ChevronRight className="size-4" />
-                  <ChevronRight className="size-4" />
-                </Button> */}
               </div>
             </div>
           </CardFooter>
