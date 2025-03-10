@@ -60,6 +60,7 @@ import {
   Building,
   CalendarDays,
   Check,
+  Info,
 } from "lucide-react";
 
 import {
@@ -449,7 +450,7 @@ export function GuidesTable() {
                       href={`/guides/guides-details/${guide.id}`}
                       className="flex items-center cursor-pointer"
                     >
-                      <Edit className="mr-2 size-4" /> Detalles
+                      <Info className="mr-2 size-4" /> Detalles
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem

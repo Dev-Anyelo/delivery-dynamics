@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 import { TableCell, TableRow } from "../ui/table";
+import { Card, CardContent, CardHeader } from "../ui/card";
 
 export function UserSkeleton() {
   return (

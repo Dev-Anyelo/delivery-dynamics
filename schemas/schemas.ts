@@ -3,6 +3,7 @@ import * as z from "zod";
 // ------ Enums ------ //
 
 export const OperationType = z.enum(["delivery", "sales"]);
+
 export const OrderStatus = z.enum([
   "pending",
   "in_progress",

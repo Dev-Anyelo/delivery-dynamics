@@ -1,5 +1,5 @@
 import { Plan, Visit } from "@/types/types";
-import { format, formatDate } from "date-fns";
+import { format } from "date-fns";
 import { Clock, MapPin, Truck } from "lucide-react";
 
 import {
@@ -9,12 +9,13 @@ import {
   CardHeader,
   CardTitle,
 } from "./card";
+import { formatDate } from "@/lib/utils";
 
 export const TimelineView = ({ plan }: { plan: Plan }) => (
   <Card>
     <CardHeader>
-      <CardTitle>Plan Timeline</CardTitle>
-      <CardDescription>Overview of the plan execution timeline</CardDescription>
+      <CardTitle>Línea de Tiempo</CardTitle>
+      <CardDescription>Resumen de la ejecución del plan</CardDescription>
     </CardHeader>
     <CardContent>
       <div className="space-y-4">
@@ -23,9 +24,9 @@ export const TimelineView = ({ plan }: { plan: Plan }) => (
             <Truck className="h-5 w-5" />
           </div>
           <div className="flex-1">
-            <p className="font-medium">Plan Created</p>
+            <p className="font-medium">Plan Creado</p>
             <p className="text-sm text-muted-foreground">
-              {format(new Date(plan.date), "PPp")}
+              {formatDate(plan.date)}
             </p>
           </div>
         </div>
@@ -36,9 +37,9 @@ export const TimelineView = ({ plan }: { plan: Plan }) => (
               <Clock className="h-5 w-5" />
             </div>
             <div className="flex-1">
-              <p className="font-medium">Plan Started</p>
+              <p className="font-medium">Inicio del Plan</p>
               <p className="text-sm text-muted-foreground">
-                {formatDate(new Date(plan.actualStartTimestamp), "PPp")}
+                {formatDate(plan.actualStartTimestamp)}
               </p>
             </div>
           </div>
@@ -53,10 +54,10 @@ export const TimelineView = ({ plan }: { plan: Plan }) => (
                 </div>
                 <div className="flex-1">
                   <p className="font-medium">
-                    Visit to {visit.customer?.name || `Customer #${idx + 1}`}
+                    Visita a {visit.customer?.name || `Cliente #${idx + 1}`}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {format(new Date(visit.actualArrivalTime), "PPp")}
+                    {formatDate(visit.actualArrivalTime)}
                   </p>
                 </div>
               </div>
@@ -69,9 +70,9 @@ export const TimelineView = ({ plan }: { plan: Plan }) => (
               <Clock className="h-5 w-5" />
             </div>
             <div className="flex-1">
-              <p className="font-medium">Plan Completed</p>
+              <p className="font-medium">Plan Completado</p>
               <p className="text-sm text-muted-foreground">
-                {format(new Date(plan.actualEndTimestamp), "PPp")}
+                {formatDate(plan.actualEndTimestamp)}
               </p>
             </div>
           </div>

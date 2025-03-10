@@ -33,9 +33,8 @@ export const getOperationTypeVariant = (
   type: string
 ): "default" | "secondary" | "outline" => {
   const typeMap: Record<string, "default" | "secondary" | "outline"> = {
-    delivery: "default",
-    pickup: "secondary",
-    transfer: "outline",
+    delivery: "outline",
+    sales: "secondary",
   };
 
   return typeMap[type.toLowerCase()] || "default";
