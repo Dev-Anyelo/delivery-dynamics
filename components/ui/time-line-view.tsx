@@ -1,5 +1,5 @@
+import { formatDate } from "@/lib/utils";
 import { Plan, Visit } from "@/types/types";
-import { format } from "date-fns";
 import { Clock, MapPin, Truck } from "lucide-react";
 
 import {
@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "./card";
-import { formatDate } from "@/lib/utils";
 
 export const TimelineView = ({ plan }: { plan: Plan }) => (
   <Card>
