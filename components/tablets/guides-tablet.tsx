@@ -449,14 +449,6 @@ export function GuidesTable() {
                       href={`/guides/guides-details/${guide.id}`}
                       className="flex items-center cursor-pointer"
                     >
-                      <Check className="mr-2 size-4" /> Guardar
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href={`/guides/guides-details/${guide.id}`}
-                      className="flex items-center cursor-pointer"
-                    >
                       <Edit className="mr-2 size-4" /> Detalles
                     </Link>
                   </DropdownMenuItem>
@@ -525,7 +517,7 @@ export function GuidesTable() {
     },
   });
 
-  // Handler functions
+  // Fetch all guides by date and driver
   const searchGuidesByDateAndDriver = async (
     formData: z.infer<typeof FilterGuidesSchema>
   ) => {
@@ -557,6 +549,7 @@ export function GuidesTable() {
     }
   };
 
+  // Fetch guide by ID
   const searchGuideByID = async (
     formData: z.infer<typeof SearchGuideSchema>
   ) => {
@@ -585,6 +578,7 @@ export function GuidesTable() {
     }
   };
 
+  // TODO: Delete guide by ID
   const handleDeleteGuide = async (guideId: number) => {
     if (!guideId) {
       toast.error("ID de guía inválido");

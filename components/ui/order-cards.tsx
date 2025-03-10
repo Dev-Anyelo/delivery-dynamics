@@ -2,11 +2,11 @@
 
 import { z } from "zod";
 import { useState } from "react";
-import { OrderProps } from "@/types/types";
+import { Order } from "@/types/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { OrderSchema } from "@/schemas/schemas";
 import { formatDate, formatTime } from "@/lib/utils";
+import { OrderSchema, OrderStatus } from "@/schemas/schemas";
 
 import {
   Calendar,
@@ -28,7 +28,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 
-export default function OrderCards({ orders }: OrderProps) {
+export default function OrderCards({ orders }: Order) {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // TODO: Implement toggleExpand function and get info from API
@@ -39,7 +39,7 @@ export default function OrderCards({ orders }: OrderProps) {
 
   return (
     <>
-      {orders.map((order: z.infer<typeof OrderSchema>, index: number) => (
+      {orders?.map((order: z.infer<typeof OrderSchema>, index: number) => (
         <Card
           key={order.id || index}
           className="overflow-hidden transition-all duration-500 hover:border-l-emerald-700 border-l-4 border-l-blue-700 hover:bg-primary/5 group"
@@ -52,7 +52,7 @@ export default function OrderCards({ orders }: OrderProps) {
               >
                 Orden {index + 1}
               </Badge>
-              {order.status === "delivered" ? (
+              {order.status === OrderStatus.Values.completed ? (
                 <Badge
                   variant="secondary"
                   className="flex items-center gap-1 rounded-full text-primary font-semibold bg-blue-500/15 text-blue-500 transition-all duration-500 justify-center"

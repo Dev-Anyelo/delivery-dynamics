@@ -171,9 +171,10 @@ export const getDrivers = async () => {
 
 // --------- GUIDES (PLANS) --------- //
 
-// Buscar una ruta por ID
+// Buscar una guía por ID
 export const fetchGuideById = async (guideId: string) => {
   try {
+    console.log("Buscando guía con ID:", guideId);
     const { data } = await axios.get(`${PLANS_API_URL}/${guideId}`);
 
     if (data?.data) {

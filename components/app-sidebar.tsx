@@ -30,22 +30,6 @@ const data = {
   ],
   navMain: [
     {
-      title: "Rutas",
-      url: "/routes",
-      icon: RouteIcon,
-      isActive: true,
-      items: [
-        {
-          title: "Todas las Rutas",
-          url: "/routes",
-        },
-        {
-          title: "Agregar nueva Ruta",
-          url: "/routes/add-route",
-        },
-      ],
-    },
-    {
       title: "Guías",
       url: "/guides",
       icon: Map,
