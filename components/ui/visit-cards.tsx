@@ -5,10 +5,10 @@ import { useState } from "react";
 import { Separator } from "./separator";
 import { VisitProps } from "@/types/types";
 import { Badge } from "@/components/ui/badge";
-import { OrderSchema, OrderStatus } from "@/schemas/schemas";
 import { Button } from "@/components/ui/button";
+import { formatDate, formatTime } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn, formatDate, formatTime } from "@/lib/utils";
+import { OrderSchema, OrderStatus } from "@/schemas/schemas";
 
 import {
   Calendar,
@@ -18,12 +18,12 @@ import {
   ChevronRight,
   CheckCircle,
   Timer,
-  ChevronDown,
   FileText,
   DollarSign,
   Tag,
   TrendingUp,
   CalendarDays,
+  AlertCircle,
 } from "lucide-react";
 
 import {
@@ -83,7 +83,7 @@ export default function VisitCard({ visits }: VisitProps) {
               {/* Date and Time */}
               <div className="space-y-1.5">
                 <CardTitle className="text-lg font-semibold flex items-center gap-2 text-slate-800 dark:text-slate-200">
-                  <CalendarDays className="size-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300" />
+                  <CalendarDays className="size-4" />
                   {visit.actualArrivalTimestamp
                     ? formatDate(visit.actualArrivalTimestamp)
                     : "Fecha pendiente"}
@@ -102,7 +102,7 @@ export default function VisitCard({ visits }: VisitProps) {
             <CardContent className="space-y-4 pt-3">
               {/* Customer Info */}
               <div className="flex items-start gap-3 text-sm">
-                <User className="size-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 mt-0.5" />
+                <User className="size-4 mt-0.5" />
                 <div className="flex flex-col">
                   <span className="font-medium text-slate-500 dark:text-slate-400 text-[13px]">
                     Cliente
@@ -115,7 +115,7 @@ export default function VisitCard({ visits }: VisitProps) {
 
               {/* Address Info */}
               <div className="flex items-start gap-3 text-sm">
-                <MapPin className="size-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 mt-0.5" />
+                <MapPin className="size-4 mt-0.5" />
                 <div className="flex flex-col">
                   <span className="font-medium text-slate-500 dark:text-slate-400 text-[13px]">
                     Dirección
@@ -129,7 +129,7 @@ export default function VisitCard({ visits }: VisitProps) {
               {/* Arrival Time */}
               {visit.actualArrivalTimestamp && (
                 <div className="flex items-start gap-3 text-sm">
-                  <Timer className="size-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300 mt-0.5" />
+                  <Timer className="size-4 mt-0.5" />
                   <div className="flex flex-col">
                     <span className="font-medium text-slate-500 dark:text-slate-400 text-[13px]">
                       Hora de llegada
@@ -144,35 +144,23 @@ export default function VisitCard({ visits }: VisitProps) {
               {/* Orders Section with Animation */}
               <AnimatePresence>
                 {expandedCard === visitId &&
-                  visit.orders &&
-                  visit.orders.length > 0 && (
+                  (visit.orders && visit.orders.length > 0 ? (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{
                         opacity: 1,
                         height: "auto",
                         transition: {
-                          height: {
-                            duration: 0.3,
-                            ease: "easeInOut",
-                          },
-                          opacity: {
-                            duration: 0.2,
-                            delay: 0.1,
-                          },
+                          height: { duration: 0.3, ease: "easeInOut" },
+                          opacity: { duration: 0.2, delay: 0.1 },
                         },
                       }}
                       exit={{
                         opacity: 0,
                         height: 0,
                         transition: {
-                          height: {
-                            duration: 0.3,
-                            ease: "easeInOut",
-                          },
-                          opacity: {
-                            duration: 0.2,
-                          },
+                          height: { duration: 0.3, ease: "easeInOut" },
+                          opacity: { duration: 0.2 },
                         },
                       }}
                       className="overflow-hidden"
@@ -187,12 +175,12 @@ export default function VisitCard({ visits }: VisitProps) {
                           }}
                           className="flex items-center gap-2"
                         >
-                          <div className="h-px bg-slate-200 dark:bg-slate-700 flex-grow"></div>
+                          <div className="h-px bg-slate-200 dark:bg-slate-700 flex-grow" />
                           <h4 className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2">
                             <FileText className="size-4" />
                             Órdenes asociadas
                           </h4>
-                          <div className="h-px bg-slate-200 dark:bg-slate-700 flex-grow"></div>
+                          <div className="h-px bg-slate-200 dark:bg-slate-700 flex-grow" />
                         </motion.div>
 
                         {visit.orders.map(
@@ -309,7 +297,35 @@ export default function VisitCard({ visits }: VisitProps) {
                         )}
                       </div>
                     </motion.div>
-                  )}
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{
+                        opacity: 1,
+                        height: "auto",
+                        transition: {
+                          height: { duration: 0.3, ease: "easeInOut" },
+                          opacity: { duration: 0.2, delay: 0.1 },
+                        },
+                      }}
+                      exit={{
+                        opacity: 0,
+                        height: 0,
+                        transition: {
+                          height: { duration: 0.3, ease: "easeInOut" },
+                          opacity: { duration: 0.2 },
+                        },
+                      }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mt-5 flex flex-col items-center justify-center p-4 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm bg-white dark:bg-slate-800">
+                        <AlertCircle className="size-4 text-muted-foreground" />
+                        <h4 className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+                          No hay órdenes asociadas
+                        </h4>
+                      </div>
+                    </motion.div>
+                  ))}
               </AnimatePresence>
             </CardContent>
 

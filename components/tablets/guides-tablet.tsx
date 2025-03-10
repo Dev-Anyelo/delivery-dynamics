@@ -8,7 +8,6 @@ import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
-import OrderCards from "../ui/order-cards";
 import VisitCards from "../ui/visit-cards";
 import { TooltipProvider } from "../ui/tooltip";
 import { Alert, AlertDescription } from "../ui/alert";
@@ -59,6 +58,8 @@ import {
   Truck,
   ShoppingCart,
   Building,
+  CalendarDays,
+  Check,
 } from "lucide-react";
 
 import {
@@ -240,10 +241,12 @@ export function GuidesTable() {
           };
 
           return (
-            <div className="flex flex-col items-start gap-1 text-sm">
-              <span className="font-medium text-primary">{address}</span>
+            <div className="flex flex-col justify-center items-center gap-1 text-sm text-center">
+              <span className="font-medium text-primary text-center">
+                {address}
+              </span>
               {typeMapping[type as keyof typeof typeMapping] && (
-                <span className="flex items-center text-muted-foreground">
+                <span className="flex justify-center items-center text-muted-foreground">
                   {typeMapping[type as keyof typeof typeMapping].label}
                 </span>
               )}
@@ -277,7 +280,7 @@ export function GuidesTable() {
           };
 
           return (
-            <div className="flex flex-col items-start gap-1 text-sm">
+            <div className="flex flex-col items-center gap-1 text-sm">
               <span className="font-medium text-primary">{address}</span>
               {typeMapping[type as keyof typeof typeMapping] && (
                 <span className="flex items-center text-muted-foreground">
@@ -367,22 +370,57 @@ export function GuidesTable() {
         header: "Fechas activas",
         cell: ({ row }) => {
           const activeDates = row.original.activeDates || [];
+
           return (
-            <div className="flex flex-col space-y-1">
-              {activeDates.length > 0 ? (
-                activeDates.map((date: string, index: number) => (
-                  <span key={index} className="text-xs text-muted-foreground">
-                    {new Intl.DateTimeFormat("es-ES", {
-                      dateStyle: "medium",
-                    }).format(new Date(date))}
-                  </span>
-                ))
-              ) : (
-                <span className="text-xs text-muted-foreground">
-                  Sin fechas activas
-                </span>
-              )}
-            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="bg-primary/10 text-primary font-semibold hover:bg-blue-500/15 hover:text-blue-500 transition-all duration-500"
+                >
+                  <CalendarDays className="size-4" />
+                  Ver fechas
+                </Button>
+              </DialogTrigger>
+
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Fechas activas</DialogTitle>
+                  <DialogDescription>
+                    Detalle de las fechas activas registradas.
+                  </DialogDescription>
+                </DialogHeader>
+
+                {activeDates.length > 0 ? (
+                  <div className="grid gap-2 max-h-64 overflow-auto mt-4">
+                    {activeDates.map((date: string, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between rounded-lg border p-3 text-sm hover:bg-muted transition-colors"
+                      >
+                        <span className="font-medium">
+                          {new Intl.DateTimeFormat("es-ES", {
+                            dateStyle: "full",
+                          }).format(new Date(date))}
+                        </span>
+                        <CalendarDays className="size-4" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground mt-4">
+                    Sin fechas activas registradas.
+                  </p>
+                )}
+
+                <DialogFooter className="pt-4">
+                  <DialogClose asChild>
+                    <Button variant="default">Cerrar</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           );
         },
       },
@@ -406,6 +444,14 @@ export function GuidesTable() {
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/guides/guides-details/${guide.id}`}
+                      className="flex items-center cursor-pointer"
+                    >
+                      <Check className="mr-2 size-4" /> Guardar
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
                       href={`/guides/guides-details/${guide.id}`}
@@ -563,22 +609,35 @@ export function GuidesTable() {
 
     const textToCopy = data
       .map((guide) => {
-        const formattedDate = new Intl.DateTimeFormat("es-ES", {
-          dateStyle: "full",
-        }).format(new Date(guide.date));
-        return `ID de la Guía: ${guide.id}
-        Conductor asignado: ${guide.assignedUserId || "Desconocido"}
-        Fecha: ${formattedDate}
-        ID de la Ruta: ${guide.guideId || "No disponible"}
-        Órdenes: ${guide.orders || "Órdenes no disponible"}`;
+        return `ID: ${guide.id}
+          Conductor: ${guide.assignedUserId || "—"}
+          Tipo de operación: ${
+            guide.operationType === OperationType.Values.delivery
+              ? "Entrega"
+              : "Ventas"
+          }
+          Punto de partida: ${guide.startPoint.address}
+          Punto de llegada: ${guide.endPoint.address}
+          Fecha: ${new Intl.DateTimeFormat("es-ES", {
+            dateStyle: "medium",
+          }).format(new Date(guide.date))}
+          Visitas: ${guide.visits.length}
+          Fechas activas: ${guide.activeDates.length}`;
       })
       .join("\n\n")
       .trim();
 
-    navigator.clipboard.writeText(textToCopy);
-    setIsCopied(true);
-    toast.success("Información copiada al portapapeles");
-    setTimeout(() => setIsCopied(false), 3000);
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        setIsCopied(true);
+        toast.success("Información copiada al portapapeles");
+        setTimeout(() => setIsCopied(false), 3000);
+      })
+      .catch((error) => {
+        toast.error("Error al copiar la información");
+        console.error("Error al copiar la información: ", error);
+      });
   };
 
   const resetFilters = () => {
@@ -600,10 +659,11 @@ export function GuidesTable() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="scroll-m-20 text-2xl font-extrabold tracking-tight lg:text-3xl">
-                  Gestión de Guías
+                  Gestión de Guías de Transporte
                 </CardTitle>
                 <CardDescription>
-                  Administra y visualiza todas las guías de transporte
+                  Administra, visualiza y controla todas las guías de transporte
+                  de manera eficiente y detallada.
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -626,16 +686,6 @@ export function GuidesTable() {
                 >
                   <Filter className="size-4" />
                 </Button>
-                <Button
-                  asChild
-                  size="sm"
-                  disabled={loading || isSearchingGuidByID}
-                >
-                  <Link href="/guides/new">
-                    <Plus className="size-4" />
-                    Nueva Guía
-                  </Link>
-                </Button>
               </div>
             </div>
           </CardHeader>
@@ -644,8 +694,20 @@ export function GuidesTable() {
               <div className="flex items-center justify-between py-3">
                 <TabsList>
                   <TabsTrigger value="all">Todas</TabsTrigger>
-                  <TabsTrigger value="active">En progreso</TabsTrigger>
-                  <TabsTrigger value="completed">Completadas</TabsTrigger>
+                  <TabsTrigger
+                    value="active"
+                    disabled
+                    className="cursor-not-allowed"
+                  >
+                    En progreso
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="completed"
+                    disabled
+                    className="cursor-not-allowed"
+                  >
+                    Completadas
+                  </TabsTrigger>
                 </TabsList>
                 <div className="flex items-center gap-2">
                   <div className="relative w-full md:w-64">
@@ -820,7 +882,7 @@ export function GuidesTable() {
                                           loading || isSearchingGuidByID
                                         }
                                       >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        <CalendarIcon className="mr-2 size-4" />
                                         {field.value
                                           ? new Intl.DateTimeFormat("es-ES", {
                                               dateStyle: "long",
@@ -889,7 +951,7 @@ export function GuidesTable() {
                                           )
                                         }
                                       >
-                                        <X className="h-4 w-4" />
+                                        <X className="size-4" />
                                         <span className="sr-only">Limpiar</span>
                                       </Button>
                                     )}
@@ -964,7 +1026,7 @@ export function GuidesTable() {
                             className="group text-center"
                           >
                             {row.getVisibleCells().map((cell) => (
-                              <TableCell key={cell.id} className="text-center">
+                              <TableCell key={cell.id}>
                                 {flexRender(
                                   cell.column.columnDef.cell,
                                   cell.getContext()
@@ -983,150 +1045,12 @@ export function GuidesTable() {
                               <div className="rounded-full bg-muted p-3 mb-2">
                                 <FileStack className="size-4" />
                               </div>
-                              <p className="text-sm">No se encontraron guías</p>
-                              <p className="text-xs">
-                                Intenta con otros filtros o crea una nueva guía
-                              </p>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </TabsContent>
-              <TabsContent value="active" className="p-0">
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id}>
-                          {headerGroup.headers.map((header) => (
-                            <TableHead key={header.id}>
-                              {header.isPlaceholder
-                                ? null
-                                : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                  )}
-                            </TableHead>
-                          ))}
-                        </TableRow>
-                      ))}
-                    </TableHeader>
-                    <TableBody>
-                      {loading ? (
-                        <RowsTableSkeletons columns={columns.length} />
-                      ) : table
-                          .getRowModel()
-                          .rows.filter(
-                            (row) => !row.original.actualEndTimestamp
-                          ).length > 0 ? (
-                        table
-                          .getRowModel()
-                          .rows.filter(
-                            (row) => !row.original.actualEndTimestamp
-                          )
-                          .map((row) => (
-                            <TableRow
-                              key={row.id}
-                              data-state={row.getIsSelected() && "selected"}
-                              className="group"
-                            >
-                              {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id}>
-                                  {flexRender(
-                                    cell.column.columnDef.cell,
-                                    cell.getContext()
-                                  )}
-                                </TableCell>
-                              ))}
-                            </TableRow>
-                          ))
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={columns.length}
-                            className="h-24 text-center"
-                          >
-                            <div className="flex flex-col items-center justify-center text-muted-foreground">
-                              <div className="rounded-full bg-muted p-3 mb-2">
-                                <FileStack className="size-4" />
-                              </div>
                               <p className="text-sm">
-                                No hay guías en progreso
+                                No se encontraron guías.
                               </p>
                               <p className="text-xs">
-                                Todas las guías están completadas
-                              </p>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </TabsContent>
-              <TabsContent value="completed" className="p-0">
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id}>
-                          {headerGroup.headers.map((header) => (
-                            <TableHead key={header.id}>
-                              {header.isPlaceholder
-                                ? null
-                                : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                  )}
-                            </TableHead>
-                          ))}
-                        </TableRow>
-                      ))}
-                    </TableHeader>
-                    <TableBody>
-                      {loading ? (
-                        <RowsTableSkeletons columns={columns.length} />
-                      ) : table
-                          .getRowModel()
-                          .rows.filter((row) => row.original.actualEndTimestamp)
-                          .length > 0 ? (
-                        table
-                          .getRowModel()
-                          .rows.filter((row) => row.original.actualEndTimestamp)
-                          .map((row) => (
-                            <TableRow
-                              key={row.id}
-                              data-state={row.getIsSelected() && "selected"}
-                              className="group"
-                            >
-                              {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id}>
-                                  {flexRender(
-                                    cell.column.columnDef.cell,
-                                    cell.getContext()
-                                  )}
-                                </TableCell>
-                              ))}
-                            </TableRow>
-                          ))
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={columns.length}
-                            className="h-24 text-center"
-                          >
-                            <div className="flex flex-col items-center justify-center text-muted-foreground">
-                              <div className="rounded-full bg-muted p-3 mb-2">
-                                <FileStack className="size-4" />
-                              </div>
-                              <p className="text-sm">
-                                No hay guías completadas
-                              </p>
-                              <p className="text-xs">
-                                Todas las guías están en progreso
+                                Realiza una búsqueda o aplica filtros para ver
+                                las guías disponibles.
                               </p>
                             </div>
                           </TableCell>
