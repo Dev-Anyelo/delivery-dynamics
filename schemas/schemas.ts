@@ -10,6 +10,7 @@ export const OrderStatus = z.enum([
   "completed",
   "delivered",
   "partially_delivered",
+  "cancelled",
 ]);
 
 export const PaymentMethodType = z.enum([
@@ -156,8 +157,8 @@ export const SalesRepresentativeSchema: z.ZodType<any> = z.object({
 
 // --- LineItemSchema ---
 export const LineItemSchema: z.ZodType<any> = z.object({
-  id: z.string().nullable(), // se permite null
-  orderId: z.string().nullable().optional(), // se permite null o undefined
+  id: z.string().nullable(),
+  orderId: z.string().nullable().optional(),
   order: z
     .lazy(() => OrderSchema)
     .optional()
