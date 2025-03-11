@@ -180,7 +180,7 @@ const GuideDetailsPage = () => {
       </div>
 
       {/* Contenido del Tab Seleccionado */}
-      <div className="mt-6">
+      <div>
         {activeIndex === 0 && <PlanDetails plan={plan} />}
         {activeIndex === 1 && <VisitsList visits={plan.visits} />}
         {activeIndex === 2 && <TimelineView plan={plan} />}

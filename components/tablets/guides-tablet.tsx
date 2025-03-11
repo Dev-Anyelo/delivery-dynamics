@@ -584,7 +584,7 @@ export function GuidesTable() {
   const handleDeleteGuide = async (guideId: number) => {};
 
   const handleCopy = () => {
-    // if (data.length === 0) return;
+    if (data.length === 0) return;
 
     const textToCopy = data
       .map((guide) => {

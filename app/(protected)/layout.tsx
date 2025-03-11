@@ -29,12 +29,6 @@ export default function DashboardLayout({
 }>) {
   const pathname = usePathname();
 
-  function getPageName(path: string) {
-    const pathArray = path.split("/");
-    const pageName = pathArray[pathArray.length - 1];
-    return pageName.charAt(0).toUpperCase() + pageName.slice(1);
-  }
-
   function getBreadcrumbs(path: string) {
     const pathArray = path.split("/").filter(Boolean);
     return pathArray.map((segment, index) => {

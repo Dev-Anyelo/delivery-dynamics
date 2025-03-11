@@ -7,6 +7,7 @@ import { InfoItem } from "./info-item";
 import { Separator } from "./separator";
 import { saveGuide } from "@/actions/actions";
 import { PlansSchema } from "@/schemas/schemas";
+import ReportGenerator from "./report-generator";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
 
 import {
@@ -66,8 +67,8 @@ export const PlanHeader = ({ plan }: { plan: Plan }) => {
           <Badge
             className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
               plan.operationType === "sales"
-                ? "text-emerald-400 bg-emerald-900/30 hover:bg-emerald-900/40"
-                : "text-blue-400 bg-blue-900/30 hover:bg-blue-900/40"
+                ? "text-emerald-600 bg-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/30 hover:bg-emerald-300 dark:hover:bg-emerald-900/40"
+                : "text-blue-600 bg-blue-200 dark:text-blue-400 dark:bg-blue-900/30 hover:bg-blue-300 dark:hover:bg-blue-900/40"
             }`}
             variant={getOperationTypeVariant(plan.operationType)}
           >
@@ -78,6 +79,8 @@ export const PlanHeader = ({ plan }: { plan: Plan }) => {
             )}
             <span className="capitalize">{plan.operationType}</span>
           </Badge>
+
+          <ReportGenerator />
 
           <Button
             type="submit"
@@ -92,10 +95,10 @@ export const PlanHeader = ({ plan }: { plan: Plan }) => {
                 Guardando Guía...
               </>
             ) : (
-                <>
+              <>
                 Guardar Guía
                 <ArrowUpRight className="size-4 transform group-hover:translate-x-[1.5px] group-hover:-translate-y-[1.5px] transition-transform duration-200" />
-                </>
+              </>
             )}
           </Button>
         </div>
