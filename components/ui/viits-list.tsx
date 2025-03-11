@@ -1,6 +1,6 @@
 import { format } from "date-fns";
+import { Pin } from "lucide-react";
 import { Order, Visit } from "@/types/types";
-import { MapPin, Package } from "lucide-react";
 import { OrderCardDetailGuide } from "./order-card";
 
 import {
@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./card";
+import { Badge } from "./badge";
 
 export const VisitsList = ({ visits }: { visits: Visit[] }) => (
   <div className="space-y-4">
@@ -45,10 +46,10 @@ export const VisitCardGuideDetails = ({
           <CardTitle className="text-xl">
             Visita #{index}: {visit.customer?.name || "Cliente desconocido"}
           </CardTitle>
-          {visit.customer?.address && (
-            <CardDescription className="flex items-center gap-1 mt-1">
-              <MapPin className="h-3 w-3" />
-              {visit.customer.address}
+          {visit.customer?.id && (
+            <CardDescription className="flex items-center gap-1 mt-1 space-x-2 text-sm">
+              ID Cliente: {visit.customer.id}{" "}
+              <Pin className="size-3 transform rotate-45" />
             </CardDescription>
           )}
         </div>
@@ -73,11 +74,6 @@ export const VisitCardGuideDetails = ({
     </CardHeader>
 
     <CardContent>
-      <h4 className="text-sm font-medium flex items-center gap-2 mb-3">
-        <Package className="h-4 w-4" />
-        <span>Órdenes</span>
-      </h4>
-
       {visit.orders && visit.orders.length > 0 ? (
         <div className="space-y-4">
           {visit.orders.map((order: Order, orderIdx: number) => (

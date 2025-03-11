@@ -19,8 +19,8 @@ export const TimelineView = ({ plan }: { plan: Plan }) => (
     <CardContent>
       <div className="space-y-4">
         <div className="flex items-center gap-4">
-          <div className="bg-primary/20 text-primary rounded-full p-2">
-            <Truck className="h-5 w-5" />
+          <div className="bg-blue-500/15 text-blue-500 rounded-full p-2">
+            <Truck className="size-5" />
           </div>
           <div className="flex-1">
             <p className="font-medium">Plan Creado</p>
@@ -32,8 +32,8 @@ export const TimelineView = ({ plan }: { plan: Plan }) => (
 
         {plan.actualStartTimestamp && (
           <div className="flex items-center gap-4">
-            <div className="bg-primary/20 text-primary rounded-full p-2">
-              <Clock className="h-5 w-5" />
+            <div className="bg-blue-500/15 text-blue-500 rounded-full p-2">
+              <Clock className="size-5" />
             </div>
             <div className="flex-1">
               <p className="font-medium">Inicio del Plan</p>
@@ -48,8 +48,8 @@ export const TimelineView = ({ plan }: { plan: Plan }) => (
           (visit: Visit, idx: number) =>
             visit.actualArrivalTime && (
               <div key={idx} className="flex items-center gap-4">
-                <div className="bg-primary/20 text-primary rounded-full p-2">
-                  <MapPin className="h-5 w-5" />
+                <div className="bg-blue-500/15 text-blue-500 rounded-full p-2">
+                  <MapPin className="size-5" />
                 </div>
                 <div className="flex-1">
                   <p className="font-medium">
@@ -65,8 +65,8 @@ export const TimelineView = ({ plan }: { plan: Plan }) => (
 
         {plan.actualEndTimestamp && (
           <div className="flex items-center gap-4">
-            <div className="bg-primary/20 text-primary rounded-full p-2">
-              <Clock className="h-5 w-5" />
+            <div className="bg-blue-500/15 text-blue-500 rounded-full p-2">
+              <Clock className="size-5" />
             </div>
             <div className="flex-1">
               <p className="font-medium">Plan Completado</p>
