@@ -15,9 +15,9 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 import { FormField, FormItem } from "@/components/ui/form";
+import { fetchAllGuides, fetchGuideById } from "@/actions/actions";
 import { RowsTableSkeletons } from "../skeletons/dashboard-skeletons";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { fetchAllGuides, deleteRoute, fetchGuideById } from "@/actions/actions";
 
 import {
   PlanSchema,
@@ -581,24 +581,7 @@ export function GuidesTable() {
   };
 
   // TODO: Delete guide by ID
-  const handleDeleteGuide = async (guideId: number) => {
-    if (!guideId) {
-      toast.error("ID de guía inválido");
-      return;
-    }
-
-    try {
-      const result = await deleteRoute(guideId);
-      if (result.success) {
-        setData((prevData) => prevData.filter((guide) => guide.id !== guideId));
-        toast.success("Guía eliminada correctamente");
-      } else {
-        toast.error("Error al eliminar la guía");
-      }
-    } catch (error: any) {
-      toast.error("Error al eliminar la guía");
-    }
-  };
+  const handleDeleteGuide = async (guideId: number) => {};
 
   const handleCopy = () => {
     // if (data.length === 0) return;

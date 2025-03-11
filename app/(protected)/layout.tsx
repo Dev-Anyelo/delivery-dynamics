@@ -35,6 +35,19 @@ export default function DashboardLayout({
     return pageName.charAt(0).toUpperCase() + pageName.slice(1);
   }
 
+  function getBreadcrumbs(path: string) {
+    const pathArray = path.split("/").filter(Boolean);
+    return pathArray.map((segment, index) => {
+      const href = "/" + pathArray.slice(0, index + 1).join("/");
+      return (
+        <BreadcrumbItem key={href}>
+          <Link href={href}>{segment}</Link>
+          {index < pathArray.length - 1 && <BreadcrumbSeparator />}
+        </BreadcrumbItem>
+      );
+    });
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -44,15 +57,7 @@ export default function DashboardLayout({
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <Link href="#">Dashboard</Link>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{getPageName(pathname)}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
+              <BreadcrumbList>{getBreadcrumbs(pathname)}</BreadcrumbList>
             </Breadcrumb>
           </div>
           <div className="flex justify-center items-center gap-3">

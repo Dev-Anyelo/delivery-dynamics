@@ -21,6 +21,7 @@ export const PaymentMethodType = z.enum([
   "bank_transfer",
   "other",
 ]);
+
 export const PointOfInterestType = z.enum([
   "store",
   "warehouse",
