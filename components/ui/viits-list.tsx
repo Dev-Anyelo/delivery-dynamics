@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "./card";
-import { Badge } from "./badge";
 
 export const VisitsList = ({ visits }: { visits: Visit[] }) => (
   <div className="space-y-4">
