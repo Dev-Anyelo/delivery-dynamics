@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { UserSchema } from "@/schemas/schemas";
 // import { EstadoConductor, Rol } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { UserSkeleton } from "../skeletons/dashboard-skeletons";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Loader, PencilLine, Plus, Search, Trash2 } from "lucide-react";
 
@@ -49,7 +50,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { UserSkeleton } from "../skeletons/dashboard-skeletons";
 
 const tabVariants = {
   hidden: { opacity: 0, y: 10 },
@@ -324,7 +324,7 @@ export function UserManagement() {
                       </FormItem>
                     )}
                   />
-                 
+
                   {/* Botones de Enviar y Cancelar */}
                   <div className="col-span-2 flex gap-2 justify-end">
                     <Button
@@ -393,27 +393,27 @@ export function UserManagement() {
                 };
 
                 return ( */}
-                  <div
-                    // key={user.id}
-                    className="relative flex flex-col p-3 border border-gray-300/30 dark:border-gray-700/30 rounded-2xl bg-[#f8f9fa]/30 dark:bg-[#121212] transition hover:border-gray-400/30 dark:hover:border-gray-500/30 hover:shadow-sm"
-                  >
-                    {/* Badges de rol y estado */}
-                    <div className="absolute top-4 right-2 flex gap-2">
-                      <Badge
-                        variant="outline"
-                        // className={roleBadgeClasses[user.rol] || ""}
-                      >
-                        {/* {user.rol} */}
-                        Administrador
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        // className={estadoBadgeClasses[user.estado] || ""}
-                      >
-                        {/* {user.estado} */}
-                        Activo
-                      </Badge>
-                      {/* {user.fechaRegistro &&
+            <div
+              // key={user.id}
+              className="relative flex flex-col p-3 border border-gray-300/30 dark:border-gray-700/30 rounded-2xl bg-[#f8f9fa]/30 dark:bg-[#121212] transition hover:border-gray-400/30 dark:hover:border-gray-500/30 hover:shadow-sm"
+            >
+              {/* Badges de rol y estado */}
+              <div className="absolute top-4 right-2 flex gap-2">
+                <Badge
+                  variant="outline"
+                  // className={roleBadgeClasses[user.rol] || ""}
+                >
+                  {/* {user.rol} */}
+                  Administrador
+                </Badge>
+                <Badge
+                  variant="outline"
+                  // className={estadoBadgeClasses[user.estado] || ""}
+                >
+                  {/* {user.estado} */}
+                  Activo
+                </Badge>
+                {/* {user.fechaRegistro &&
                         new Date(user.fechaRegistro).toDateString() ===
                           new Date().toDateString() && (
                           <Badge
@@ -423,64 +423,61 @@ export function UserManagement() {
                             Nuevo
                           </Badge>
                         )} */}
-                    </div>
-                    {/* Información del usuario */}
-                    <div className="flex items-center gap-4">
-                      <Avatar>
-                        <AvatarFallback>
-                          Anyelo Benavides
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col gap-1">
-                        <p className="font-medium text-lg">
-                          {/* {user.nombre} */}
-                          Anyelo Benavides
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {/* {user.correo} */}
-                          anyelobg@gmail.com
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {/* {new Intl.DateTimeFormat("es-ES", {
+              </div>
+              {/* Información del usuario */}
+              <div className="flex items-center gap-4">
+                <Avatar>
+                  <AvatarFallback>AB</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col gap-1">
+                  <p className="font-medium text-lg">
+                    {/* {user.nombre} */}
+                    Anyelo Benavides
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {/* {user.correo} */}
+                    anyelobg@gmail.com
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {/* {new Intl.DateTimeFormat("es-ES", {
                             dateStyle: "full",
                           }).format(new Date(user.fechaRegistro || ""))} */}
-
-                          01/01/2021
-                        </p>
-                      </div>
-                    </div>
-                    {/* Botones para editar o eliminar */}
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={isSubmitting || isDeleting}
-                        onClick={() => {
-                          // setSelectedUser(user);
-                          // reset({ ...user, id: user.id });
-                          setShowForm(true);
-                        }}
-                      >
-                        <PencilLine className="size-4" />
-                      </Button>
-                      <Button
-                        disabled={isSubmitting || isDeleting}
-                        variant="ghost"
-                        size="sm"
-                        // onClick={() => setUserToDelete(user)}
-                      >
-                        {/* {deletingUserId === user.id ? (
+                    01/01/2021
+                  </p>
+                </div>
+              </div>
+              {/* Botones para editar o eliminar */}
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={isSubmitting || isDeleting}
+                  onClick={() => {
+                    // setSelectedUser(user);
+                    // reset({ ...user, id: user.id });
+                    setShowForm(true);
+                  }}
+                >
+                  <PencilLine className="size-4" />
+                </Button>
+                <Button
+                  disabled={isSubmitting || isDeleting}
+                  variant="ghost"
+                  size="sm"
+                  // onClick={() => setUserToDelete(user)}
+                >
+                  {/* {deletingUserId === user.id ? (
                           <>
                             <Loader className="animate-spin size-4" />
                           </>
                         ) : (
                           <Trash2 className="size-4" />
                         )} */}
-                      </Button>
-                    </div>
-                  </div>
-                {/* ); */}
-              {/* }) */}
+                </Button>
+              </div>
+            </div>
+            {/* ); */}
+            {/* }) */}
             {/* ) : (
               <p className="text-center text-muted-foreground">
                 No se encontraron resultados.

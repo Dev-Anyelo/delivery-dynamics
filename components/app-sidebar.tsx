@@ -5,7 +5,7 @@ import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 // import { NavProjects } from "@/components/nav-projects";
 import { TeamSwitcher } from "@/components/team-switcher";
-import { PackageCheck, Map, RouteIcon } from "lucide-react";
+import { PackageCheck, Map, RouteIcon, Users, FileStack } from "lucide-react";
 
 import {
   Sidebar,
@@ -35,12 +35,41 @@ const data = {
       icon: Map,
       items: [
         {
-          title: "Todas las Guías",
+          title: "Gestionar guías",
           url: "/guides",
         },
+      ],
+    },
+    {
+      title: "Clientes",
+      url: "/clients",
+      icon: RouteIcon,
+      items: [
         {
-          title: "Agregar nueva Guía",
-          url: "/guides/add-guide",
+          title: "Gestionar clientes",
+          url: "/clients",
+        },
+      ],
+    },
+    {
+      title: "Usuarios",
+      url: "/users",
+      icon: Users,
+      items: [
+        {
+          title: "Gestionar usuarios",
+          url: "/users",
+        },
+      ],
+    },
+    {
+      title: "Reportes",
+      url: "/reports",
+      icon: FileStack,
+      items: [
+        {
+          title: "Generar reportes",
+          url: "/reports",
         },
       ],
     },

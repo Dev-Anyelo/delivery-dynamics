@@ -7,6 +7,7 @@ import * as React from "react";
 import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { formatDate } from "@/lib/utils";
 import { Calendar } from "../ui/calendar";
 import VisitCards from "../ui/visit-cards";
 import { TooltipProvider } from "../ui/tooltip";
@@ -600,7 +601,7 @@ export function GuidesTable() {
   };
 
   const handleCopy = () => {
-    if (data.length === 0) return;
+    // if (data.length === 0) return;
 
     const textToCopy = data
       .map((guide) => {
@@ -613,9 +614,7 @@ export function GuidesTable() {
           }
           Punto de partida: ${guide.startPoint.address}
           Punto de llegada: ${guide.endPoint.address}
-          Fecha: ${new Intl.DateTimeFormat("es-ES", {
-            dateStyle: "medium",
-          }).format(new Date(guide.date))}
+          Fecha: ${formatDate(guide.date)}
           Visitas: ${guide.visits.length}
           Fechas activas: ${guide.activeDates.length}`;
       })
@@ -654,7 +653,7 @@ export function GuidesTable() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="scroll-m-20 text-2xl font-extrabold tracking-tight lg:text-3xl">
-                  Gestión de Guías de Transporte
+                  Gestión de Guías
                 </CardTitle>
                 <CardDescription>
                   Administra, visualiza y controla todas las guías de transporte

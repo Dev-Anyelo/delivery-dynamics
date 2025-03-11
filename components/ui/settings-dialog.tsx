@@ -5,12 +5,12 @@ import { useState } from "react";
 // import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "./avatar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserManagement } from "../settings/user-management";
 import { AccountSettings } from "../settings/account-settings";
 import { PrivacySettings } from "../settings/privacy-settings";
 import { AppearanceSettings } from "../settings/appearance-settings";
-// import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationSettings } from "../settings/notification-settings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -64,26 +64,18 @@ export function SettingsDialog() {
   // const { user, setUser } = useAuth();
   const [open, setOpen] = useState(false);
 
-  // const handleLogout = async () => {
-  //   try {
-  //     const res = await fetch("/api/logout", {
-  //       method: "POST",
-  //       credentials: "include",
-  //     });
-  //     if (res.ok) {
-  //       setUser(null);
-  //       router.push("/auth/login");
-  //     } else {
-  //       toast.error("Error al cerrar sesión");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error al cerrar sesión:", error);
-  //     toast.error("Ocurrió un error inesperado");
-  //   }
-  // };
+  const handleLogout = async () => {};
 
   return (
     <TooltipProvider>
+      <Avatar
+        className="size-8 rounded-lg cursor-pointer"
+        onClick={() => setOpen(true)}
+      >
+        {/* <AvatarImage src={user.avatar} alt={user.name} /> */}
+        <AvatarFallback className="rounded-lg">AB</AvatarFallback>
+      </Avatar>
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col p-0">
           <Tabs
@@ -134,7 +126,7 @@ export function SettingsDialog() {
               size="sm"
               variant="destructive"
               className="space-x-2"
-              onClick={() => {}}
+              onClick={handleLogout}
             >
               <LogOut className="size-4" />
               Cerrar sesión

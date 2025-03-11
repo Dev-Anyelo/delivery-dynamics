@@ -225,12 +225,13 @@ export function AccountSettings() {
                 >
                   Cancelar
                 </Button>
-                <Button size="sm" type="submit" disabled>
+                <Button size="sm" type="submit">
                   {/* {isUpdatingInfo ? (
                     <Loader className="size-4 animate-spin" />
                   ) : (
                     "Guardar"
                   )} */}
+                  Guardar
                 </Button>
               </div>
             </form>

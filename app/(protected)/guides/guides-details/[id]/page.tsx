@@ -4,7 +4,6 @@ import axios from "axios";
 import type React from "react";
 import { Plan } from "@/types/types";
 import { useParams } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
 import { PlanSchema } from "@/schemas/schemas";
 import { useEffect, useState, useRef } from "react";
 import { VisitsList } from "@/components/ui/viits-list";
@@ -99,7 +98,7 @@ const GuideDetailsPage = () => {
     return <ErrorState message={error || "Plan information not found."} />;
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto space-y-6">
       <PlanHeader plan={plan} />
 
       {/* Tabs Animados */}

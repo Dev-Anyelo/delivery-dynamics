@@ -22,37 +22,40 @@ import {
 } from "@/lib/utils";
 
 export const PlanHeader = ({ plan }: { plan: Plan }) => (
-  <section className="space-y-4">
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Guía {plan.id}</h1>
-        <p className="text-muted-foreground">{formatDate(plan.date)}</p>
+  <section className="space-y-6">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="space-y-1">
+        <h1 className="text-4xl font-bold tracking-tight text-primary">
+          Guía #{plan.id}
+        </h1>
+        <p className="text-sm text-muted-foreground">{formatDate(plan.date)}</p>
       </div>
-      <div className="flex justify-center items-center gap-4">
+
+      <div className="flex flex-wrap justify-center items-center gap-3">
         <Badge
-          className={`w-fit ${
+          className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
             plan.operationType === "sales"
-              ? "text-emerald-400 bg-emerald-900/70 dark:bg-emerald-900/50"
-              : "text-blue-400 bg-blue-900/70 dark:bg-blue-900/50"
+              ? "text-emerald-400 bg-emerald-900/30 hover:bg-emerald-900/40"
+              : "text-blue-400 bg-blue-900/30 hover:bg-blue-900/40"
           }`}
           variant={getOperationTypeVariant(plan.operationType)}
         >
           {plan.operationType === "sales" ? (
-            <Truck className="h-4 w-4 mr-1" />
+            <Truck className="size-4" />
           ) : (
-            <ShoppingBagIcon className="h-4 w-4 mr-1" />
+            <ShoppingBagIcon className="size-4" />
           )}
-          {plan.operationType.charAt(0).toUpperCase() +
-            plan.operationType.slice(1)}
+          <span className="capitalize">{plan.operationType}</span>
         </Badge>
 
-        <Button size="sm">
+        <Button size="sm" className="flex justify-center items-center group">
           Guardar
-          <ArrowUpRight className="inline size-4" />
+          <ArrowUpRight className="size-4 transform group-hover:translate-x-[1.5px] group-hover:-translate-y-[1.5px] transition-transform duration-200" />
         </Button>
       </div>
     </div>
-    <Separator />
+
+    <Separator className="mt-2" />
   </section>
 );
 
