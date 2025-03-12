@@ -35,3 +35,17 @@ export interface FormErrorProps {
 export interface FormSuccessProps {
   message?: string;
 }
+
+export interface CheckmarkProps {
+  size?: number;
+  strokeWidth?: number;
+  color?: string;
+  className?: string;
+}
+
+export interface ReportDialogProps {
+  isOpen: boolean;
+  handleClose: () => void;
+  selectedFile?: { name: string } | null;
+  exportType: "excel" | "pdf" | null;
+}

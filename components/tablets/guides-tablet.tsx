@@ -130,8 +130,10 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { useAuth } from "../AuthContext";
 
 export function GuidesTable() {
+  const { user } = useAuth();
   const [loading, setLoading] = React.useState<boolean>(false);
   const [data, setData] = React.useState<z.infer<typeof PlanSchema>[]>([]);
   const [isCopied, setIsCopied] = React.useState<boolean>(false);

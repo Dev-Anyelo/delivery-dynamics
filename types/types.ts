@@ -2,9 +2,11 @@ import * as z from "zod";
 
 import {
   LineItemSchema,
+  loginSchema,
   OrderSchema,
   PlanSchema,
   PlansSchema,
+  UserSchema,
   VisitSchema,
 } from "@/schemas/schemas";
 
@@ -21,3 +23,7 @@ export type VisitProps = {
 export type OrderProps = {
   orders: z.infer<typeof OrderSchema>[];
 };
+
+export type LoginFormValues = z.infer<typeof loginSchema>;
+
+export type User = z.infer<typeof UserSchema>;

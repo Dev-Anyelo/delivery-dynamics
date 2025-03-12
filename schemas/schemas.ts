@@ -29,24 +29,30 @@ export const PointOfInterestType = z.enum([
   "headquarters",
 ]);
 
+export const UserRole = z.enum(["USER", "ADMIN", "MANAGER"]);
+
 // ------ Schemas ------ //
+
+// Login schema
+export const loginSchema = z.object({
+  email: z.string().email({ message: "Ingresa un email válido" }),
+  password: z
+    .string()
+    .min(8, { message: "La contraseña debe tener al menos 8 caracteres" }),
+});
 
 // User schema
 export const UserSchema = z.object({
-  id: z.number().optional(),
-  name: z
-    .string()
-    .min(1, { message: "El campo 'name' es requerido" })
-    .optional(),
+  id: z.string().optional(),
+  name: z.string().min(1, { message: "El campo 'name' es requerido" }),
   email: z
     .string()
     .email({ message: "El campo 'email' debe ser un correo electrónico" }),
-  password: z
-    .string()
-    .min(8, { message: "El campo 'password' debe tener al menos 8 caracteres" })
-    .optional(),
-  role: z.string().min(1, { message: "El campo 'role' es requerido" }),
-  active: z.boolean().optional(),
+  password: z.string().min(8, {
+    message: "El campo 'password' debe tener al menos 8 caracteres",
+  }),
+  role: UserRole,
+  isActive: z.boolean().optional(),
 });
 
 export const FilterGuidesSchema = z.object({

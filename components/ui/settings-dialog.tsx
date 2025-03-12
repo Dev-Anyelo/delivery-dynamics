@@ -1,14 +1,15 @@
 "use client";
 
+import axios from "axios";
 import { toast } from "sonner";
 import { useState } from "react";
-// import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../AuthContext";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "./avatar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserManagement } from "../settings/user-management";
 import { AccountSettings } from "../settings/account-settings";
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { PrivacySettings } from "../settings/privacy-settings";
 import { AppearanceSettings } from "../settings/appearance-settings";
 import { NotificationSettings } from "../settings/notification-settings";
@@ -60,11 +61,27 @@ const tabItems = [
 ];
 
 export function SettingsDialog() {
-  // const router = useRouter();
-  // const { user, setUser } = useAuth();
+  const router = useRouter();
+  const { user, setUser } = useAuth();
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogout = async () => {};
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      await axios.post("/api/auth/logout");
+      setUser(null);
+      toast.warning("Sesión cerrada correctamente");
+      setTimeout(() => {
+        router.push("/auth/login");
+      }, 2000);
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      toast.error("Error al cerrar sesión");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <TooltipProvider>
@@ -72,8 +89,20 @@ export function SettingsDialog() {
         className="size-8 rounded-lg cursor-pointer"
         onClick={() => setOpen(true)}
       >
-        {/* <AvatarImage src={user.avatar} alt={user.name} /> */}
-        <AvatarFallback className="rounded-lg">AB</AvatarFallback>
+        <AvatarImage
+          src="/yo.jpg"
+          alt={user?.name}
+          className="rounded-lg w-full h-full object-cover"
+        />
+        {user ? (
+          <AvatarFallback className="text-blue-600 bg-blue-200 dark:text-blue-400 dark:bg-blue-900/30 hover:bg-blue-300 dark:hover:bg-blue-900/40">
+            {user.name[0].toUpperCase()}
+          </AvatarFallback>
+        ) : (
+          <AvatarFallback className="text-blue-600 bg-blue-200 dark:text-blue-400 dark:bg-blue-900/30 hover:bg-blue-300 dark:hover:bg-blue-900/40">
+            <Loader className="size-4 animate-spin" />
+          </AvatarFallback>
+        )}
       </Avatar>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -85,7 +114,6 @@ export function SettingsDialog() {
             {/* Dialog Header: título oculto y navegación de tabs */}
             <DialogHeader className="px-6 py-4">
               <div className="flex items-center justify-center w-full">
-                {/* Se oculta el título accesible */}
                 <DialogTitle aria-hidden className="hidden">
                   Settings
                 </DialogTitle>
@@ -120,16 +148,24 @@ export function SettingsDialog() {
             </div>
           </Tabs>
 
-          {/* Footer del diálogo */}
           <div className="flex items-center justify-between px-6 py-4 border-t dark:border-gray-700">
             <Button
               size="sm"
               variant="destructive"
               className="space-x-2"
               onClick={handleLogout}
+              disabled={loading}
             >
-              <LogOut className="size-4" />
-              Cerrar sesión
+              {loading ? (
+                <>
+                  <Loader className="size-4 animate-spin" />
+                </>
+              ) : (
+                <>
+                  <LogOut className="size-4" />
+                  Cerrar sesión
+                </>
+              )}
             </Button>
             <Button size="sm" onClick={() => setOpen(false)}>
               Cerrar

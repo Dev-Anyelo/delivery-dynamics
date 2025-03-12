@@ -2,9 +2,9 @@
 
 import { z } from "zod";
 import axios from "axios";
-import { Plans } from "@/types/types";
+import { LoginFormValues, Plans } from "@/types/types";
 import { PlansSchema } from "@/schemas/schemas";
-import { PLANS_API_URL } from "@/constants/constants";
+import { BACKEND_URL, PLANS_API_URL } from "@/constants/constants";
 
 // --------- GUIDES (PLANS) --------- //
 
@@ -87,3 +87,33 @@ export const saveGuide = async (guide: Plans) => {
     };
   }
 };
+
+// --------- AUTHENTICATION --------- //
+
+// Login
+export async function login(values: LoginFormValues) {
+  try {
+    const response = await axios.post(`${BACKEND_URL}/auth/login`, values, {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
+    });
+
+    return {
+      data: response.data,
+      headers: response.headers,
+      status: response.status,
+    };
+  } catch (error: any) {
+    console.error("Error en loginAction:", error);
+
+    if (error.response && error.response.data) {
+      return {
+        data: error.response.data,
+        headers: error.response.headers,
+        status: error.response.status,
+      };
+    }
+
+    throw error;
+  }
+}

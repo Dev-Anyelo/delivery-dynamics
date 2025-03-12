@@ -5,7 +5,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { FileSpreadsheet, FileText, Download, File, Check } from "lucide-react";
+import { FileSpreadsheet, FileText, Download, File } from "lucide-react";
+import { CheckmarkProps, ReportDialogProps } from "@/interfaces/interfaces";
 
 import {
   DropdownMenu,
@@ -22,14 +23,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-
-interface CheckmarkProps {
-  size?: number;
-  strokeWidth?: number;
-  color?: string;
-  className?: string;
-}
 
 const draw = {
   hidden: { pathLength: 0, opacity: 0 },
@@ -102,13 +95,6 @@ const availableFiles = [
   { id: 4, name: "Datos de Clientes", type: "customers" },
   { id: 5, name: "Métricas de Rendimiento", type: "performance" },
 ];
-
-interface ReportDialogProps {
-  isOpen: boolean;
-  handleClose: () => void;
-  selectedFile?: { name: string } | null;
-  exportType: "excel" | "pdf" | null;
-}
 
 export function ReportDialog({
   isOpen,
@@ -273,7 +259,7 @@ export default function ReportGenerator() {
                   onClick={() => handleFileSelect(file, "excel")}
                   className="gap-2 cursor-pointer transition-all hover:translate-x-1 duration-200"
                 >
-                  <FileSpreadsheet className="h-4 w-4" />
+                  <FileSpreadsheet className="size-4" />
                   <span>Excel</span>
                 </DropdownMenuItem>
 
@@ -281,7 +267,7 @@ export default function ReportGenerator() {
                   onClick={() => handleFileSelect(file, "pdf")}
                   className="gap-2 cursor-pointer transition-all hover:translate-x-1 duration-200"
                 >
-                  <FileText className="h-4 w-4" />
+                  <FileText className="size-4" />
                   <span>PDF</span>
                 </DropdownMenuItem>
               </div>
@@ -301,4 +287,3 @@ export default function ReportGenerator() {
     </>
   );
 }
-

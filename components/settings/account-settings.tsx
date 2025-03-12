@@ -4,14 +4,13 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useState } from "react";
 import { motion } from "framer-motion";
-// import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../AuthContext";
 import { useForm } from "react-hook-form";
 import { Loader, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { UserSchema } from "@/schemas/schemas";
+import { UserRole, UserSchema } from "@/schemas/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { EstadoConductor, Rol } from "@prisma/client";
 import { Separator } from "@/components/ui/separator";
 // import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -47,17 +46,19 @@ const tabVariants = {
 };
 
 export function AccountSettings() {
-  // const { user, setUser } = useAuth();
+  const { user } = useAuth();
   // const [isUpdatingInfo, setIsUpdatingInfo] = useState(false);
 
   const formMethods = useForm<z.infer<typeof UserSchema>>({
     resolver: zodResolver(UserSchema),
     mode: "onChange",
     defaultValues: {
-      id: 0,
-      name: "",
-      email: "",
+      id: user?.id || "",
+      name: user?.name || "",
+      email: user?.email || "",
       password: "",
+      role: user?.role || UserRole.Values.USER,
+      isActive: user?.isActive === true,
     },
   });
 
@@ -130,10 +131,8 @@ export function AccountSettings() {
         </CardHeader>
         <CardContent className="space-y-6">
           <Form {...formMethods}>
-            <form
-              // onSubmit={handleSubmit(onSubmitData)}
-              className="grid gap-4 sm:grid-cols-2"
-            >
+            <form className="grid gap-4 sm:grid-cols-2">
+              {/* Campos para name, email y password */}
               <FormField
                 control={formMethods.control}
                 name="name"
@@ -141,11 +140,7 @@ export function AccountSettings() {
                   <FormItem>
                     <FormLabel>Nombre completo</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="John Doe"
-                        {...field}
-                        // disabled={isUpdatingInfo}
-                      />
+                      <Input placeholder="John Doe" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -162,7 +157,6 @@ export function AccountSettings() {
                         type="email"
                         placeholder="john@example.com"
                         {...field}
-                        // disabled={isUpdatingInfo}
                       />
                     </FormControl>
                     <FormMessage />
@@ -180,7 +174,6 @@ export function AccountSettings() {
                         type="password"
                         placeholder="********"
                         {...field}
-                        // disabled={isUpdatingInfo}
                       />
                     </FormControl>
                     <FormMessage />
@@ -188,49 +181,36 @@ export function AccountSettings() {
                 )}
               />
 
+              {/* Campo de rol: iteramos sobre los valores (strings) */}
               <FormField
                 control={formMethods.control}
                 name="role"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Rol actual</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      // defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger disabled>
                           <SelectValue placeholder="Selecciona el rol" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {/* {Object.values(Rol).map((rol) => (
+                        {Object.values(UserRole.Values).map((rol: string) => (
                           <SelectItem key={rol} value={rol}>
                             {rol}
                           </SelectItem>
-                        ))} */}
-                        Usuario
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div className="flex justify-end gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => reset()}
-                  // disabled={isUpdatingInfo}
-                >
+              <div className="flex justify-end gap-2 col-span-2">
+                <Button size="sm" variant="outline" onClick={() => reset()}>
                   Cancelar
                 </Button>
                 <Button size="sm" type="submit">
-                  {/* {isUpdatingInfo ? (
-                    <Loader className="size-4 animate-spin" />
-                  ) : (
-                    "Guardar"
-                  )} */}
                   Guardar
                 </Button>
               </div>
