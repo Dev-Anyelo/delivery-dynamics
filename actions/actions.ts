@@ -104,7 +104,7 @@ export async function login(values: LoginFormValues) {
       status: response.status,
     };
   } catch (error: any) {
-    console.error("Error en loginAction:", error);
+    console.error("Error en login:", error);
 
     if (error.response && error.response.data) {
       return {

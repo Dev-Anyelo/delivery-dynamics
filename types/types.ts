@@ -18,6 +18,7 @@ export type LineItem = z.infer<typeof LineItemSchema>;
 
 export type VisitProps = {
   visits: z.infer<typeof VisitSchema>[];
+  
 };
 
 export type OrderProps = {

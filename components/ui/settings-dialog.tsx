@@ -111,7 +111,6 @@ export function SettingsDialog() {
             defaultValue="account"
             className="flex flex-col flex-1 overflow-hidden"
           >
-            {/* Dialog Header: título oculto y navegación de tabs */}
             <DialogHeader className="px-6 py-4">
               <div className="flex items-center justify-center w-full">
                 <DialogTitle aria-hidden className="hidden">
@@ -138,7 +137,6 @@ export function SettingsDialog() {
               </div>
             </DialogHeader>
 
-            {/* Contenido de los Tabs */}
             <div className="flex-1 overflow-y-auto">
               {tabItems.map(({ value, component: Component }) => (
                 <TabsContent key={value} value={value}>
@@ -157,9 +155,7 @@ export function SettingsDialog() {
               disabled={loading}
             >
               {loading ? (
-                <>
-                  <Loader className="size-4 animate-spin" />
-                </>
+                <Loader className="size-4 animate-spin" />
               ) : (
                 <>
                   <LogOut className="size-4" />

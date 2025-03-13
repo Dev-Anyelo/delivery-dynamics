@@ -2,7 +2,6 @@ import axios from "axios";
 import { NextResponse } from "next/server";
 import { BACKEND_URL } from "@/constants/constants";
 
-// Verify if the user is authenticated and return the user data
 export async function GET(req: Request) {
   try {
     const cookie = req.headers.get("cookie") || "";

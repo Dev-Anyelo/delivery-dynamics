@@ -53,9 +53,11 @@ export default function LoginForm() {
       } else {
         toast.error(data.message || "Credenciales inválidas");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al iniciar sesión:", error);
-      toast.error("Ocurrió un error inesperado");
+      const message =
+        error.response?.data?.message || "Ocurrió un error inesperado";
+      toast.error(message);
     } finally {
       setIsPending(false);
     }

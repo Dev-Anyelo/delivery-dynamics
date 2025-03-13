@@ -24,22 +24,30 @@ import {
 
 export default function DashboardLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   const pathname = usePathname();
 
   function getBreadcrumbs(path: string) {
     const pathArray = path.split("/").filter(Boolean);
-    return pathArray.map((segment, index) => {
+    const items = pathArray.map((segment, index) => {
       const href = "/" + pathArray.slice(0, index + 1).join("/");
       return (
         <BreadcrumbItem key={href}>
           <Link href={href}>{segment}</Link>
-          {index < pathArray.length - 1 && <BreadcrumbSeparator />}
         </BreadcrumbItem>
       );
     });
+
+    const breadcrumbs: React.ReactNode[] = [];
+    items.forEach((item, index) => {
+      breadcrumbs.push(item);
+      if (index < items.length - 1) {
+        breadcrumbs.push(<BreadcrumbSeparator key={`sep-${index}`} />);
+      }
+    });
+    return breadcrumbs;
   }
 
   return (
@@ -47,7 +55,7 @@ export default function DashboardLayout({
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex justify-between items-center pr-8 h-16 sm:h-20 shrink-0 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 dark:bg-[#0a0908]">
+          <header className="flex justify-between items-center pr-8 h-16 sm:h-20 shrink-0 gap-2 transition-[width,height] ease-linear dark:bg-[#0a0908]">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />

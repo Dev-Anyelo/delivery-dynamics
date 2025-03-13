@@ -450,7 +450,7 @@ export function GuidesTable() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link
-                      href={`/guides/guides-details/${guide.id}`}
+                      href={`/dashboard/guides/guides-details/${guide.id}`}
                       className="flex items-center cursor-pointer"
                     >
                       <Info className="mr-2 size-4" /> Detalles
