@@ -5,8 +5,9 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { User } from "@/types/types";
 import { useAuth } from "./AuthContext";
+import { Skeleton } from "./ui/skeleton";
 import { useRouter } from "next/navigation";
-import { ChevronsUpDown, Loader, LogOut } from "lucide-react";
+import { ChevronsUpDown, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import {
@@ -116,7 +117,10 @@ export function NavUser({ user }: { user: User }) {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Loader className="size-4 animate-spin mx-auto" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="size-8 rounded-lg" />
+            <Skeleton className="w-full h-8 rounded-md" />
+          </div>
         )}
       </SidebarMenuItem>
     </SidebarMenu>

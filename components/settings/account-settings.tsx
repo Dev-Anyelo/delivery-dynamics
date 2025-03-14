@@ -89,7 +89,7 @@ export function AccountSettings() {
         delete payload.password;
       }
 
-      const response = await fetch(`/api/user/update-current-user/${user.id}`, {
+      const response = await fetch(`/api/user/update/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

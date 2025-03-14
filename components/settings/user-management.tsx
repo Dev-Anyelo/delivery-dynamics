@@ -2,20 +2,37 @@
 
 import * as z from "zod";
 import { toast } from "sonner";
+import { User } from "@/types/types";
 import { motion } from "framer-motion";
-// import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../AuthContext";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-// import { User } from "@/interfaces/interfaces";
 import { Button } from "@/components/ui/button";
-import { UserSchema } from "@/schemas/schemas";
-// import { EstadoConductor, Rol } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { UserRole, UserSchema } from "@/schemas/schemas";
 import { UserSkeleton } from "../skeletons/dashboard-skeletons";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Loader, PencilLine, Plus, Search, Trash2 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import {
+  Calendar,
+  CheckCircle2,
+  Loader,
+  Mail,
+  PencilLine,
+  Plus,
+  Search,
+  Shield,
+  Trash2,
+  UserIcon,
+  UserCog,
+  UserPlus,
+  Users,
+  X,
+  XCircle,
+} from "lucide-react";
 
 import {
   Card,
@@ -58,16 +75,17 @@ const tabVariants = {
 };
 
 export function UserManagement() {
-  // const { user } = useAuth();
-  // const [users, setUsers] = useState<User[]>([]);
+  const { user } = useAuth();
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // const [userToDelete, setUserToDelete] = useState<User | null>(null);
-  // const [, setSelectedUser] = useState<User | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("all");
 
   const formMethods = useForm<z.infer<typeof UserSchema>>({
     resolver: zodResolver(UserSchema),
@@ -77,109 +95,137 @@ export function UserManagement() {
       name: "",
       email: "",
       password: "",
+      isActive: true,
+      role: UserRole.Values.USER,
+      fechaCreacion: new Date(),
     },
   });
 
   const { handleSubmit, reset } = formMethods;
 
-  // Obtiene los usuarios de la API
-  // const fetchUsers = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     const response = await fetch("/api/users");
-  //     const data = await response.json();
-  //     setUsers(data);
-  //   } catch (error) {
-  //     console.error("Error al obtener los usuarios:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
+  // fetch all users
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/user/all-users");
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Error al obtener los usuarios:", error);
+      toast.error("No se pudieron cargar los usuarios");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // Función para registrar o actualizar el usuario
-  // const handleAddOrEditUser = async (
-  //   userData: z.infer<typeof usuarioSchema>
-  // ) => {
-  //   try {
-  //     const finalData = { ...userData, id: userData.id || undefined };
-  //     const isEditing = !!finalData.id;
+  // add or edit user
+  const handleAddOrEditUser = async (userData: z.infer<typeof UserSchema>) => {
+    try {
+      const finalData = { ...userData, id: userData.id || undefined };
+      const isEditing = !!finalData.id;
 
-  //     const endpoint = isEditing
-  //       ? `/api/edit-user/${finalData.id}`
-  //       : "/api/register";
+      const endpoint = isEditing
+        ? `/api/user/update/${finalData.id}`
+        : "/api/user/create";
 
-  //     const method = isEditing ? "PUT" : "POST";
+      const method = isEditing ? "PUT" : "POST";
 
-  //     const response = await fetch(endpoint, {
-  //       method,
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(finalData),
-  //     });
+      const response = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(finalData),
+      });
 
-  //     const result = await response.json();
+      const result = await response.json();
 
-  //     if (!response.ok) {
-  //       toast.error(result.message || "Error al realizar la operación");
-  //       return;
-  //     }
-  //     fetchUsers();
-  //     toast.success(
-  //       `Usuario ${isEditing ? "actualizado" : "registrado"} exitosamente.`
-  //     );
-  //     setShowForm(false);
-  //     setSelectedUser(null);
-  //   } catch (error) {
-  //     console.error("Error en la operación:", error);
-  //     toast.error("Hubo un error al realizar la operación.");
-  //   }
-  // };
+      if (!response.ok) {
+        toast.error(result.message || "Error al realizar la operación");
+        return;
+      }
+      fetchUsers();
+      toast.success(
+        `Usuario ${isEditing ? "actualizado" : "registrado"} exitosamente.`
+      );
+      setShowForm(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Error en la operación:", error);
+      toast.error("Hubo un error al realizar la operación.");
+    }
+  };
 
-  // const onSubmitData = async (values: z.infer<typeof usuarioSchema>) => {
-  //   setIsSubmitting(true);
-  //   await handleAddOrEditUser(values);
-  //   reset({
-  //     id: undefined,
-  //     name: "",
-  //     email: "",
-  //     password: "",
-  //   });
+  const onSubmitData = async (values: z.infer<typeof UserSchema>) => {
+    setIsSubmitting(true);
+    await handleAddOrEditUser(values);
+    reset({
+      id: undefined,
+      name: "",
+      email: "",
+      password: "",
+      isActive: true,
+      role: UserRole.Values.USER,
+    });
 
-  //   setIsSubmitting(false);
-  // };
+    setIsSubmitting(false);
+  };
 
-  // Función para eliminar un usuario
-  // const DeleteUserByID = async (userID: string) => {
-  //   setIsDeleting(true);
-  //   setDeletingUserId(userID);
-  //   try {
-  //     const response = await fetch(`/api/delete-user/${userID}`, {
-  //       method: "DELETE",
-  //     });
-  //     const data = await response.json();
-  //     if (data.success) {
-  //       fetchUsers();
-  //       toast.success(data.message);
-  //     } else {
-  //       toast.error(data.message);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error al eliminar el usuario:", error);
-  //     toast.error("Ocurrió un error inesperado al eliminar el usuario.");
-  //   } finally {
-  //     setIsDeleting(false);
-  //     setDeletingUserId(null);
-  //   }
-  // };
+  // delete user by id
+  const DeleteUserByID = async (id: string) => {
+    setIsDeleting(true);
+    setDeletingUserId(id);
+    try {
+      const response = await fetch(`/api/user/delete/${id}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+      if (data.success) {
+        fetchUsers();
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.error("Error al eliminar el usuario:", error);
+      toast.error("Ocurrió un error inesperado al eliminar el usuario.");
+    } finally {
+      setIsDeleting(false);
+      setDeletingUserId(null);
+    }
+  };
 
-  // useEffect(() => {
-  //   fetchUsers();
-  // }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-  // Filtra los usuarios según el término de búsqueda
-  // const filteredUsers = users.filter(
-  //   (u) =>
-  //     u.id !== user?.id && u.nombre.toLowerCase().includes(search.toLowerCase())
-  // );
+  // filter users
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
+      u.name.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase());
+    const isNotCurrentUser = u.id !== user?.id;
+
+    if (activeTab === "all") return isNotCurrentUser && matchesSearch;
+    if (activeTab === "active")
+      return isNotCurrentUser && u.isActive && matchesSearch;
+    if (activeTab === "inactive")
+      return isNotCurrentUser && !u.isActive && matchesSearch;
+
+    return (
+      isNotCurrentUser && u.role === activeTab.toUpperCase() && matchesSearch
+    );
+  });
+
+  // Get role icon
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case UserRole.Values.ADMIN:
+        return <Shield className="size-4" />;
+      case UserRole.Values.MANAGER:
+        return <UserCog className="size-4" />;
+      default:
+        return <UserIcon className="size-4" />;
+    }
+  };
 
   return (
     <motion.div
@@ -187,28 +233,37 @@ export function UserManagement() {
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="space-y-6"
+      className="space-y-6 max-w-6xl mx-auto"
     >
-      <Card className="border-none">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">
-            Gestión de Usuarios
-          </CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">
-            Administra los usuarios de la plataforma. Puedes agregar, editar o
-            eliminar usuarios.
-          </CardDescription>
-          <Badge variant="outline" className="bg-indigo-600 text-white w-fit">
-            Usuarios
-          </Badge>
+      <Card className="border shadow-sm">
+        <CardHeader className="relative pb-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                <Users className="size-5" />
+                Gestión de Usuarios
+              </CardTitle>
+              <CardDescription className="text-sm text-muted-foreground mt-1">
+                Administra los usuarios de la plataforma. Puedes agregar, editar
+                o eliminar usuarios.
+              </CardDescription>
+            </div>
+            <Badge
+              variant="secondary"
+              className="bg-primary/10 text-primary hover:bg-primary/15 transition-colors"
+            >
+              <Users className="size-3.5 mr-1" />
+              {users.length} Usuarios
+            </Badge>
+          </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 pt-4">
           {/* Barra de búsqueda y botón para agregar usuario */}
-          <div className="flex items-center justify-between">
-            <div className="relative max-w-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="relative w-full sm:max-w-sm">
               <Input
-                placeholder="Buscar usuario"
+                placeholder="Buscar por nombre o correo"
                 className="pl-10"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -216,40 +271,91 @@ export function UserManagement() {
               <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                 <Search className="size-4 text-muted-foreground" />
               </span>
+              {search && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full aspect-square rounded-l-none"
+                  onClick={() => setSearch("")}
+                >
+                  <X className="size-4" />
+                </Button>
+              )}
             </div>
             <Button
-              size="sm"
               onClick={() => {
                 reset({
                   id: undefined,
                   name: "",
                   email: "",
                   password: "",
+                  isActive: true,
+                  role: UserRole.Values.USER,
                 });
-                // setSelectedUser(null);
+                setSelectedUser(null);
                 setShowForm(true);
               }}
-              className="space-x-2"
+              className="sm:w-auto w-full"
             >
-              <Plus className="size-4" />
+              <UserPlus className="size-4 mr-2" />
               <span>Agregar usuario</span>
             </Button>
           </div>
 
+          {/* Tabs for filtering */}
+          <Tabs
+            defaultValue="all"
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-4">
+              <TabsTrigger value="all">Todos</TabsTrigger>
+              <TabsTrigger value="active">Activos</TabsTrigger>
+              <TabsTrigger value="inactive">Inactivos</TabsTrigger>
+              <TabsTrigger value="admin">Admin</TabsTrigger>
+              <TabsTrigger value="manager">Manager</TabsTrigger>
+              <TabsTrigger value="user">Usuario</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           {/* Formulario para creación/edición */}
           {showForm && (
-            <Card className="p-4 mx-auto">
+            <Card className="border shadow-sm p-5 mx-auto bg-card/50 backdrop-blur-sm">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">
+                  {selectedUser ? "Editar Usuario" : "Nuevo Usuario"}
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setShowForm(false);
+                    setSelectedUser(null);
+                    reset({
+                      id: undefined,
+                      name: "",
+                      email: "",
+                      password: "",
+                      isActive: true,
+                      role: UserRole.Values.USER,
+                    });
+                  }}
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
               <Form {...formMethods}>
                 <form
-                  // onSubmit={handleSubmit(onSubmitData)}
-                  className="grid grid-cols-2 gap-4"
+                  onSubmit={handleSubmit(onSubmitData)}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
                 >
                   {/* Campo Nombre */}
                   <FormField
                     control={formMethods.control}
                     name="name"
                     render={({ field }) => (
-                      <FormItem className="col-span-2">
+                      <FormItem className="md:col-span-2">
                         <FormLabel>Nombre completo</FormLabel>
                         <FormControl>
                           <Input
@@ -317,7 +423,56 @@ export function UserManagement() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="admin">Administrador</SelectItem>
+                            {Object.values(UserRole.Values).map((role) => (
+                              <SelectItem
+                                key={role}
+                                value={role}
+                                className="flex items-center gap-2"
+                              >
+                                {getRoleIcon(role)}
+                                {role}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Campo Estado */}
+                  <FormField
+                    control={formMethods.control}
+                    name="isActive"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <Select
+                          onValueChange={(value) =>
+                            field.onChange(value === "true")
+                          }
+                          defaultValue={String(field.value)}
+                        >
+                          <FormControl>
+                            <SelectTrigger disabled={isSubmitting}>
+                              <SelectValue placeholder="Selecciona el estado" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem
+                              value="true"
+                              className="flex items-center gap-2"
+                            >
+                              <CheckCircle2 className="size-4 text-emerald-500" />
+                              Activo
+                            </SelectItem>
+                            <SelectItem
+                              value="false"
+                              className="flex items-center gap-2"
+                            >
+                              <XCircle className="size-4 text-rose-500" />
+                              Inactivo
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -326,40 +481,35 @@ export function UserManagement() {
                   />
 
                   {/* Botones de Enviar y Cancelar */}
-                  <div className="col-span-2 flex gap-2 justify-end">
+                  <div className="md:col-span-2 flex gap-3 justify-end mt-2">
                     <Button
                       disabled={isSubmitting}
-                      size="sm"
-                      type="submit"
-                      className="w-full"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader className="animate-spin size-5 mr-1 inline-block" />
-                          Guardando datos...
-                        </>
-                      ) : (
-                        <>Guardar &rarr;</>
-                      )}
-                    </Button>
-                    <Button
-                      disabled={isSubmitting}
-                      size="sm"
                       type="button"
-                      variant="ghost"
+                      variant="outline"
                       onClick={() => {
                         setShowForm(false);
-                        // setSelectedUser(null);
+                        setSelectedUser(null);
                         reset({
                           id: undefined,
                           name: "",
                           email: "",
                           password: "",
+                          isActive: true,
+                          role: UserRole.Values.USER,
                         });
                       }}
-                      className="w-full"
                     >
                       Cancelar
+                    </Button>
+                    <Button disabled={isSubmitting} type="submit">
+                      {isSubmitting ? (
+                        <>
+                          <Loader className="animate-spin size-4 mr-2" />
+                          Guardando...
+                        </>
+                      ) : (
+                        <>{selectedUser ? "Actualizar" : "Guardar"}</>
+                      )}
                     </Button>
                   </div>
                 </form>
@@ -368,144 +518,183 @@ export function UserManagement() {
           )}
 
           {/* Listado de usuarios */}
-          <div className="space-y-4">
-            {/* {isLoading ? (
-              Array.from({ length: 9 }).map((_, index) => (
+          <div className="space-y-3">
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, index) => (
                 <UserSkeleton key={index} />
               ))
             ) : filteredUsers.length > 0 ? (
-              filteredUsers.map((user: User) => {
-                const roleBadgeClasses = {
-                  [Rol.ADMINISTRADOR]:
-                    "text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 h-fit",
-                  [Rol.CONDUCTOR]:
-                    "text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 h-fit",
-                  [Rol.MECANICO]:
-                    "text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900/30 h-fit",
-                  [Rol.USUARIO]:
-                    "text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 h-fit",
-                };
-                const estadoBadgeClasses = {
-                  [EstadoConductor.ACTIVO]:
-                    "text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 h-fit",
-                  [EstadoConductor.INACTIVO]:
-                    "text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900/30 h-fit",
-                };
+              <div className="grid gap-3">
+                {filteredUsers.map((user: User) => (
+                  <div
+                    key={user.id}
+                    className="relative p-4 border border-border/50 rounded-xl bg-card/30 hover:bg-card/50 transition-all hover:shadow-sm"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                      {/* Avatar and user info */}
+                      <div className="flex items-center gap-3 flex-1">
+                        <Avatar className="h-12 w-12 border-2 border-primary/10">
+                          <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                            {user?.name
+                              .split(" ")
+                              .map((name: string) => name[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <p className="font-semibold text-base">
+                            {user?.name}
+                          </p>
+                          <div className="flex items-center text-sm text-muted-foreground gap-1">
+                            <Mail className="size-3.5" />
+                            {user?.email}
+                          </div>
+                          <div className="flex items-center text-xs text-muted-foreground gap-1 mt-0.5">
+                            <Calendar className="size-3.5" />
+                            {user?.fechaCreacion &&
+                              new Date(
+                                user?.fechaCreacion
+                              ).toLocaleDateString()}
+                            {user?.fechaCreacion &&
+                              new Date(user?.fechaCreacion).toDateString() ===
+                                new Date().toDateString() && (
+                                <Badge
+                                  variant="outline"
+                                  className="ml-2 text-[10px] py-0 h-4 bg-primary/10 text-primary border-primary/20"
+                                >
+                                  Nuevo
+                                </Badge>
+                              )}
+                          </div>
+                        </div>
+                      </div>
 
-                return ( */}
-            <div
-              // key={user.id}
-              className="relative flex flex-col p-3 border border-gray-300/30 dark:border-gray-700/30 rounded-2xl bg-[#f8f9fa]/30 dark:bg-[#121212] transition hover:border-gray-400/30 dark:hover:border-gray-500/30 hover:shadow-sm"
-            >
-              {/* Badges de rol y estado */}
-              <div className="absolute top-4 right-2 flex gap-2">
-                <Badge
-                  variant="outline"
-                  // className={roleBadgeClasses[user.rol] || ""}
-                >
-                  {/* {user.rol} */}
-                  Administrador
-                </Badge>
-                <Badge
-                  variant="outline"
-                  // className={estadoBadgeClasses[user.estado] || ""}
-                >
-                  {/* {user.estado} */}
-                  Activo
-                </Badge>
-                {/* {user.fechaRegistro &&
-                        new Date(user.fechaRegistro).toDateString() ===
-                          new Date().toDateString() && (
-                          <Badge
-                            variant="outline"
-                            className="bg-indigo-600 text-white"
+                      {/* Badges and actions */}
+                      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                        <Badge
+                          variant="outline"
+                          className={`flex items-center gap-1 ${
+                            user.role === UserRole.Values.ADMIN
+                              ? "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800 dark:text-blue-400"
+                              : user.role === UserRole.Values.MANAGER
+                              ? "bg-violet-500/10 text-violet-600 border-violet-200 dark:border-violet-800 dark:text-violet-400"
+                              : "bg-amber-500/10 text-amber-600 border-amber-200 dark:border-amber-800 dark:text-amber-400"
+                          }`}
+                        >
+                          {getRoleIcon(user.role)}
+                          {user.role}
+                        </Badge>
+
+                        <Badge
+                          variant="outline"
+                          className={`flex items-center gap-1 ${
+                            user.isActive
+                              ? "bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-800 dark:text-emerald-400"
+                              : "bg-rose-500/10 text-rose-600 border-rose-200 dark:border-rose-800 dark:text-rose-400"
+                          }`}
+                        >
+                          {user.isActive ? (
+                            <>
+                              <CheckCircle2 className="size-3.5" />
+                              Activo
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="size-3.5" />
+                              Inactivo
+                            </>
+                          )}
+                        </Badge>
+
+                        <div className="flex gap-1 ml-auto sm:ml-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full bg-primary/5 hover:bg-primary/10"
+                            disabled={isSubmitting || isDeleting}
+                            onClick={() => {
+                              setSelectedUser(user);
+                              reset({ ...user, id: user?.id });
+                              setShowForm(true);
+                            }}
                           >
-                            Nuevo
-                          </Badge>
-                        )} */}
+                            <PencilLine className="size-3.5" />
+                          </Button>
+                          <Button
+                            disabled={isSubmitting || isDeleting}
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full bg-destructive/5 hover:bg-destructive/10 text-destructive"
+                            onClick={() => setUserToDelete(user)}
+                          >
+                            {deletingUserId === user?.id ? (
+                              <Loader className="animate-spin size-3.5" />
+                            ) : (
+                              <Trash2 className="size-3.5" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              {/* Información del usuario */}
-              <div className="flex items-center gap-4">
-                <Avatar>
-                  <AvatarFallback>AB</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col gap-1">
-                  <p className="font-medium text-lg">
-                    {/* {user.nombre} */}
-                    Anyelo Benavides
+            ) : (
+              <div className="text-center py-10 bg-muted/30 rounded-lg border border-dashed">
+                <div className="flex flex-col items-center gap-2">
+                  <Users className="size-10 text-muted-foreground/50" />
+                  <p className="text-muted-foreground font-medium">
+                    No se encontraron usuarios
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {/* {user.correo} */}
-                    anyelobg@gmail.com
+                  <p className="text-sm text-muted-foreground/70">
+                    {search
+                      ? "Intenta con otra búsqueda"
+                      : "Agrega usuarios para comenzar"}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {/* {new Intl.DateTimeFormat("es-ES", {
-                            dateStyle: "full",
-                          }).format(new Date(user.fechaRegistro || ""))} */}
-                    01/01/2021
-                  </p>
+                  {search && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => setSearch("")}
+                    >
+                      <X className="size-3.5 mr-1" />
+                      Limpiar búsqueda
+                    </Button>
+                  )}
                 </div>
               </div>
-              {/* Botones para editar o eliminar */}
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={isSubmitting || isDeleting}
-                  onClick={() => {
-                    // setSelectedUser(user);
-                    // reset({ ...user, id: user.id });
-                    setShowForm(true);
-                  }}
-                >
-                  <PencilLine className="size-4" />
-                </Button>
-                <Button
-                  disabled={isSubmitting || isDeleting}
-                  variant="ghost"
-                  size="sm"
-                  // onClick={() => setUserToDelete(user)}
-                >
-                  {/* {deletingUserId === user.id ? (
-                          <>
-                            <Loader className="animate-spin size-4" />
-                          </>
-                        ) : (
-                          <Trash2 className="size-4" />
-                        )} */}
-                </Button>
-              </div>
-            </div>
-            {/* ); */}
-            {/* }) */}
-            {/* ) : (
-              <p className="text-center text-muted-foreground">
-                No se encontraron resultados.
-              </p>
-            )} */}
+            )}
           </div>
         </CardContent>
       </Card>
 
       {/* Modal de confirmación para eliminar usuario */}
-      {/* {userToDelete && (
+      {userToDelete && (
         <Dialog
           open={!!userToDelete}
           onOpenChange={(open) => !open && setUserToDelete(null)}
         >
-          <DialogContent className="rounded-lg shadow-lg max-w-sm mx-auto">
+          <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold">
+              <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+                <Trash2 className="size-5 text-destructive" />
                 Confirmar Eliminación
               </DialogTitle>
-              <DialogDescription className="text-sm text-muted-foreground">
-                ¿Estás seguro de que deseas eliminar al usuario
-                <span className="font-medium ml-1">{userToDelete.nombre}</span>?
-                Esta acción no se puede deshacer.
+              <DialogDescription className="pt-2">
+                ¿Estás seguro de que deseas eliminar a
+                <span className="font-medium mx-1 text-foreground">
+                  {userToDelete.name}
+                </span>
+                ? Esta acción no se puede deshacer.
               </DialogDescription>
             </DialogHeader>
-            <DialogFooter className="mt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setUserToDelete(null)}>
+            <DialogFooter className="mt-4 flex gap-2 sm:justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setUserToDelete(null)}
+                className="sm:w-auto w-full"
+              >
                 Cancelar
               </Button>
               <Button
@@ -514,13 +703,24 @@ export function UserManagement() {
                   DeleteUserByID(userToDelete.id!);
                   setUserToDelete(null);
                 }}
+                className="sm:w-auto w-full"
               >
-                Eliminar
+                {isDeleting ? (
+                  <>
+                    <Loader className="size-4 mr-2 animate-spin" />
+                    Eliminando...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="size-4 mr-2" />
+                    Eliminar
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      )} */}
+      )}
     </motion.div>
   );
 }

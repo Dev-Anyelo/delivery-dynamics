@@ -40,7 +40,6 @@ import {
 
 import {
   Loader,
-  Edit,
   Search,
   CalendarIcon,
   MoreHorizontal,
@@ -48,8 +47,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowUpRight,
-  Filter,
-  Plus,
   X,
   SlidersHorizontal,
   RefreshCcw,
@@ -58,9 +55,7 @@ import {
   AlertCircle,
   Truck,
   ShoppingCart,
-  Building,
   CalendarDays,
-  Check,
   Info,
 } from "lucide-react";
 
@@ -130,16 +125,13 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { useAuth } from "../AuthContext";
 
 export function GuidesTable() {
-  const { user } = useAuth();
   const [loading, setLoading] = React.useState<boolean>(false);
   const [data, setData] = React.useState<z.infer<typeof PlanSchema>[]>([]);
   const [isCopied, setIsCopied] = React.useState<boolean>(false);
   const [isSearchingGuidByID, setIsSearchingGuidByID] =
     React.useState<boolean>(false);
-  const [showFilters, setShowFilters] = React.useState<boolean>(false);
 
   // Table states
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -541,7 +533,6 @@ export function GuidesTable() {
       if (success) {
         setData(data || []);
         toast.success(message || "Datos cargados correctamente");
-        setShowFilters(false);
       } else {
         setData([]);
         toast.error(message || "Error en la solicitud");
@@ -645,27 +636,6 @@ export function GuidesTable() {
                   de manera eficiente y detallada.
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={loading || isSearchingGuidByID}
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="hidden md:flex"
-                >
-                  <Filter className="mr-2 size-4" />
-                  {showFilters ? "Ocultar filtros" : "Mostrar filtros"}
-                </Button>
-                <Button
-                  disabled={loading || isSearchingGuidByID}
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="md:hidden"
-                >
-                  <Filter className="size-4" />
-                </Button>
-              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -764,217 +734,215 @@ export function GuidesTable() {
                 </div>
               </div>
 
-              {showFilters && (
-                <div className="p-6 dark:bg-muted/35 rounded-lg">
-                  <div className="mb-4">
-                    <h1 className="text-lg font-semibold">Filtros</h1>
-                    <p className="text-sm text-muted-foreground">
-                      Puedes filtrar las guías por criterios específicos o
-                      generales.
-                    </p>
-                  </div>
+              {/* Filtros */}
+              <div className="p-6 dark:bg-muted/20 rounded-lg">
+                <div className="mb-4">
+                  <h1 className="text-lg font-semibold">Filtros</h1>
+                  <p className="text-sm text-muted-foreground">
+                    Puedes filtrar las guías por criterios específicos o
+                    generales.
+                  </p>
+                </div>
 
-                  {/* Sección 1: Búsqueda específica */}
-                  <div className="mb-6">
-                    <h2 className="text-md font-semibold mb-2">
-                      Búsqueda por ID
-                    </h2>
+                {/* Sección 1: Búsqueda específica */}
+                <div className="mb-6">
+                  <h2 className="text-md font-semibold mb-2">
+                    Búsqueda por ID
+                  </h2>
+                  <Card className="border shadow-none">
+                    <CardHeader className="p-4 pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        ID de la Guía
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-0">
+                      <form
+                        onSubmit={searchForm.handleSubmit(searchGuideByID)}
+                        className="space-y-2"
+                      >
+                        <div className="flex space-x-2">
+                          <div className="relative flex-1">
+                            <Input
+                              id="guideSearchID"
+                              placeholder="Ej: 1234"
+                              {...searchForm.register("guideSearchID")}
+                              className="pr-10"
+                              disabled={loading || isSearchingGuidByID}
+                            />
+                            {searchForm.watch("guideSearchID") && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-0 top-0 size-9"
+                                onClick={() =>
+                                  searchForm.setValue("guideSearchID", "")
+                                }
+                              >
+                                <X className="size-4" />
+                                <span className="sr-only">Limpiar</span>
+                              </Button>
+                            )}
+                          </div>
+                          <Button
+                            type="submit"
+                            size="icon"
+                            disabled={loading || isSearchingGuidByID}
+                            className="size-9"
+                          >
+                            {isSearchingGuidByID ? (
+                              <Loader className="size-4 animate-spin" />
+                            ) : (
+                              <Search className="size-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Sección 2: Filtros Generales */}
+                <div>
+                  <h2 className="text-md font-semibold mb-2">
+                    Filtros Generales
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Filtrar por fecha */}
                     <Card className="border shadow-none">
                       <CardHeader className="p-4 pb-2">
                         <CardTitle className="text-sm font-medium">
-                          ID de la Guía
+                          Fecha
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="p-4 pt-0">
-                        <form
-                          onSubmit={searchForm.handleSubmit(searchGuideByID)}
-                          className="space-y-2"
-                        >
-                          <div className="flex space-x-2">
-                            <div className="relative flex-1">
-                              <Input
-                                id="guideSearchID"
-                                placeholder="Ej: 1234"
-                                {...searchForm.register("guideSearchID")}
-                                className="pr-10"
-                                disabled={loading || isSearchingGuidByID}
-                              />
-                              {searchForm.watch("guideSearchID") && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  className="absolute right-0 top-0 size-9"
-                                  onClick={() =>
-                                    searchForm.setValue("guideSearchID", "")
-                                  }
-                                >
-                                  <X className="size-4" />
-                                  <span className="sr-only">Limpiar</span>
-                                </Button>
-                              )}
-                            </div>
-                            <Button
-                              type="submit"
-                              size="icon"
-                              disabled={loading || isSearchingGuidByID}
-                              className="size-9"
-                            >
-                              {isSearchingGuidByID ? (
-                                <Loader className="size-4 animate-spin" />
-                              ) : (
-                                <Search className="size-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </form>
+                        <FormProvider {...filterForm}>
+                          <FormField
+                            control={filterForm.control}
+                            name="date"
+                            render={({ field }) => (
+                              <FormItem className="space-y-2">
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      className="w-full justify-start text-left font-normal"
+                                      disabled={loading || isSearchingGuidByID}
+                                    >
+                                      <CalendarIcon className="mr-2 size-4" />
+                                      {field.value
+                                        ? new Intl.DateTimeFormat("es-ES", {
+                                            dateStyle: "long",
+                                          }).format(new Date(field.value))
+                                        : "Seleccione fecha"}
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent
+                                    className="w-auto p-0"
+                                    align="start"
+                                  >
+                                    <Calendar
+                                      mode="single"
+                                      selected={
+                                        field.value instanceof Date
+                                          ? field.value
+                                          : new Date(field.value)
+                                      }
+                                      onSelect={field.onChange}
+                                      disabled={(date) =>
+                                        date > new Date() ||
+                                        date < new Date("1900-01-01")
+                                      }
+                                      initialFocus
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                              </FormItem>
+                            )}
+                          />
+                        </FormProvider>
+                      </CardContent>
+                    </Card>
+
+                    {/* Filtrar por conductor */}
+                    <Card className="border shadow-none">
+                      <CardHeader className="p-4 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                          Conductor
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-0">
+                        <FormProvider {...filterForm}>
+                          <FormField
+                            control={filterForm.control}
+                            name="assignedUserId"
+                            render={({ field }) => (
+                              <FormItem className="space-y-2">
+                                <div className="relative">
+                                  <Input
+                                    placeholder="ID del conductor"
+                                    {...field}
+                                    className="pr-10"
+                                    disabled={loading || isSearchingGuidByID}
+                                  />
+                                  {field.value && (
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="absolute right-0 top-0 size-9"
+                                      onClick={() =>
+                                        filterForm.setValue(
+                                          "assignedUserId",
+                                          ""
+                                        )
+                                      }
+                                    >
+                                      <X className="size-4" />
+                                      <span className="sr-only">Limpiar</span>
+                                    </Button>
+                                  )}
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                        </FormProvider>
                       </CardContent>
                     </Card>
                   </div>
-
-                  {/* Sección 2: Filtros Generales */}
-                  <div>
-                    <h2 className="text-md font-semibold mb-2">
-                      Filtros Generales
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Filtrar por fecha */}
-                      <Card className="border shadow-none">
-                        <CardHeader className="p-4 pb-2">
-                          <CardTitle className="text-sm font-medium">
-                            Fecha
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-4 pt-0">
-                          <FormProvider {...filterForm}>
-                            <FormField
-                              control={filterForm.control}
-                              name="date"
-                              render={({ field }) => (
-                                <FormItem className="space-y-2">
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <Button
-                                        variant="outline"
-                                        className="w-full justify-start text-left font-normal"
-                                        disabled={
-                                          loading || isSearchingGuidByID
-                                        }
-                                      >
-                                        <CalendarIcon className="mr-2 size-4" />
-                                        {field.value
-                                          ? new Intl.DateTimeFormat("es-ES", {
-                                              dateStyle: "long",
-                                            }).format(new Date(field.value))
-                                          : "Seleccione fecha"}
-                                      </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent
-                                      className="w-auto p-0"
-                                      align="start"
-                                    >
-                                      <Calendar
-                                        mode="single"
-                                        selected={
-                                          field.value instanceof Date
-                                            ? field.value
-                                            : new Date(field.value)
-                                        }
-                                        onSelect={field.onChange}
-                                        disabled={(date) =>
-                                          date > new Date() ||
-                                          date < new Date("1900-01-01")
-                                        }
-                                        initialFocus
-                                      />
-                                    </PopoverContent>
-                                  </Popover>
-                                </FormItem>
-                              )}
-                            />
-                          </FormProvider>
-                        </CardContent>
-                      </Card>
-
-                      {/* Filtrar por conductor */}
-                      <Card className="border shadow-none">
-                        <CardHeader className="p-4 pb-2">
-                          <CardTitle className="text-sm font-medium">
-                            Conductor
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-4 pt-0">
-                          <FormProvider {...filterForm}>
-                            <FormField
-                              control={filterForm.control}
-                              name="assignedUserId"
-                              render={({ field }) => (
-                                <FormItem className="space-y-2">
-                                  <div className="relative">
-                                    <Input
-                                      placeholder="ID del conductor"
-                                      {...field}
-                                      className="pr-10"
-                                      disabled={loading || isSearchingGuidByID}
-                                    />
-                                    {field.value && (
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className="absolute right-0 top-0 size-9"
-                                        onClick={() =>
-                                          filterForm.setValue(
-                                            "assignedUserId",
-                                            ""
-                                          )
-                                        }
-                                      >
-                                        <X className="size-4" />
-                                        <span className="sr-only">Limpiar</span>
-                                      </Button>
-                                    )}
-                                  </div>
-                                </FormItem>
-                              )}
-                            />
-                          </FormProvider>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-
-                  {/* Botones de acción */}
-                  <div className="flex justify-end mt-6 gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={resetFilters}
-                      disabled={loading || isSearchingGuidByID}
-                    >
-                      <RefreshCcw className="size-4" />
-                      Reiniciar
-                    </Button>
-                    <Button
-                      disabled={loading || isSearchingGuidByID}
-                      size="sm"
-                      onClick={filterForm.handleSubmit(
-                        searchGuidesByDateAndDriver
-                      )}
-                    >
-                      {loading ? (
-                        <Loader className="size-4 animate-spin" />
-                      ) : (
-                        <>
-                          <Search className="size-4" />
-                          Buscar
-                        </>
-                      )}
-                    </Button>
-                  </div>
                 </div>
-              )}
 
+                {/* Botones de acción */}
+                <div className="flex justify-end mt-6 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetFilters}
+                    disabled={loading || isSearchingGuidByID}
+                  >
+                    <RefreshCcw className="size-4" />
+                    Reiniciar
+                  </Button>
+                  <Button
+                    disabled={loading || isSearchingGuidByID}
+                    size="sm"
+                    onClick={filterForm.handleSubmit(
+                      searchGuidesByDateAndDriver
+                    )}
+                  >
+                    {loading ? (
+                      <Loader className="size-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Search className="size-4" />
+                        Buscar
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Tabla de guías */}
               <TabsContent value="all" className="p-0">
                 <div className="rounded-md border">
                   <Table>
@@ -1041,7 +1009,7 @@ export function GuidesTable() {
               </TabsContent>
             </Tabs>
           </CardContent>
-          <CardFooter className="flex items-center justify-between p-4 border-t">
+          <CardFooter className="flex items-center justify-between p-4 mt-4 border-t">
             <div className="flex-1 text-sm text-muted-foreground">
               {table.getFilteredSelectedRowModel().rows.length > 0 ? (
                 <span>

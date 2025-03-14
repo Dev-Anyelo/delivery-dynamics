@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
+import { useAuth } from "./AuthContext";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
-// import { NavProjects } from "@/components/nav-projects";
 import { TeamSwitcher } from "@/components/team-switcher";
+// import { NavProjects } from "@/components/nav-projects";
 import { PackageCheck, Map, RouteIcon, Users, FileStack } from "lucide-react";
 
 import {
@@ -14,7 +15,6 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { useAuth } from "./AuthContext";
 
 const data = {
   teams: [
@@ -27,7 +27,7 @@ const data = {
   navMain: [
     {
       title: "Guías",
-      url: "/guides",
+      url: "/dashboard/guides",
       icon: Map,
       items: [
         {
@@ -38,7 +38,7 @@ const data = {
     },
     {
       title: "Clientes",
-      url: "/clients",
+      url: "/dashboard/clients",
       icon: RouteIcon,
       items: [
         {
@@ -49,7 +49,7 @@ const data = {
     },
     {
       title: "Usuarios",
-      url: "/users",
+      url: "/dashboard/users",
       icon: Users,
       items: [
         {
@@ -60,7 +60,7 @@ const data = {
     },
     {
       title: "Reportes",
-      url: "/reports",
+      url: "/dashboard/reports",
       icon: FileStack,
       items: [
         {

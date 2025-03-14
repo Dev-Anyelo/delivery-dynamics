@@ -3,6 +3,7 @@
 import axios from "axios";
 import { toast } from "sonner";
 import { useState } from "react";
+import { Skeleton } from "./skeleton";
 import { useAuth } from "../AuthContext";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -99,9 +100,7 @@ export function SettingsDialog() {
             {user.name[0].toUpperCase()}
           </AvatarFallback>
         ) : (
-          <AvatarFallback className="text-blue-600 bg-blue-200 dark:text-blue-400 dark:bg-blue-900/30 hover:bg-blue-300 dark:hover:bg-blue-900/40">
-            <Loader className="size-4 animate-spin" />
-          </AvatarFallback>
+          <Skeleton className="size-8 rounded-lg" />
         )}
       </Avatar>
 
