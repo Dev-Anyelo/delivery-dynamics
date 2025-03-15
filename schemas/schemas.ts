@@ -360,6 +360,10 @@ export const PlanSchema: z.ZodType<any> = z.object({
 // --- PlansSchema (array de PlanSchema) ---
 export const PlansSchema = z.array(PlanSchema);
 
+export const CreatePlansInputSchema = z.object({
+  plans: PlansSchema,
+});
+
 // --- BusinessSegmentSchema ---
 export const BusinessSegmentSchema = z.object({
   id: z.string(),

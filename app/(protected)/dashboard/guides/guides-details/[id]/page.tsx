@@ -18,7 +18,7 @@ const GuideDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Estados y refs para los tabs animados
+  // State for the tabs and active indicator
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [hoverStyle, setHoverStyle] = useState({});
@@ -52,21 +52,21 @@ const GuideDetailsPage = () => {
     if (id) fetchData();
   }, [id]);
 
-  // Actualiza el estilo del highlight al hacer hover
+  // Update the hover style of the indicator
   useEffect(() => {
-    if (hoveredIndex !== null) {
-      const hoveredElement = tabRefs.current[hoveredIndex];
-      if (hoveredElement) {
-        const { offsetLeft, offsetWidth } = hoveredElement;
-        setHoverStyle({
+    if (plan) {
+      const activeElement = tabRefs.current[activeIndex];
+      if (activeElement) {
+        const { offsetLeft, offsetWidth } = activeElement;
+        setActiveStyle({
           left: `${offsetLeft}px`,
           width: `${offsetWidth}px`,
         });
       }
     }
-  }, [hoveredIndex]);
+  }, [activeIndex, plan]);
 
-  // Actualiza el estilo del indicador activo
+  // Update the active indicator style when the active tab changes
   useEffect(() => {
     const activeElement = tabRefs.current[activeIndex];
     if (activeElement) {
@@ -78,7 +78,7 @@ const GuideDetailsPage = () => {
     }
   }, [activeIndex]);
 
-  // Establece el indicador activo en el primer tab al montar el componente
+  // Set the default active indicator style
   useEffect(() => {
     requestAnimationFrame(() => {
       const defaultElement = tabRefs.current[0];
