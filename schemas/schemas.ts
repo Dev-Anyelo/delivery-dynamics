@@ -234,8 +234,8 @@ export const OrderSchema: z.ZodType<any> = z.object({
   plan: z
     .lazy(() => PlanSchema)
     .optional()
-    .nullable(), // si no se envía, es opcional
-  customerId: z.string(),
+    .nullable(),
+  customerId: z.string().optional(),
   customer: z
     .lazy(() => CustomerSchema)
     .optional()
@@ -392,14 +392,14 @@ export const AddressSchema: z.ZodType<any> = z.object({
   notes: z.string().nullable().optional(),
   contact: z.string().nullable(),
   businessType: z.string().nullable(),
-  customerId: z.string().optional(),
+  customerId: z.string().nullable().optional(),
   customer: z.lazy(() => CustomerSchema).optional(),
-  firstDeliveryTimeWindowId: z.string().optional(),
+  firstDeliveryTimeWindowId: z.string().nullable().optional(),
   firstDeliveryTimeWindow: z
     .lazy(() => TimeWindowSchema)
     .optional()
     .nullable(),
-  secondDeliveryTimeWindowId: z.string().optional(),
+  secondDeliveryTimeWindowId: z.string().nullable().optional(),
   secondDeliveryTimeWindow: z
     .lazy(() => TimeWindowSchema)
     .optional()
