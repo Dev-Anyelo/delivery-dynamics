@@ -11,6 +11,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { TimelineView } from "@/components/ui/time-line-view";
 import { PlanDetails, PlanHeader } from "@/components/ui/plan";
 import { LoadingState } from "@/components/skeletons/dashboard-skeletons";
+import { SearchableVisitsList } from "@/components/ui/search-visits";
 
 const GuideDetailsPage = () => {
   const { id } = useParams() as { id: string };
@@ -25,7 +26,7 @@ const GuideDetailsPage = () => {
   const [activeStyle, setActiveStyle] = useState({ left: "0px", width: "0px" });
   const tabRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Fetch de los detalles del plan
+  // Fetch the plan details
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -180,7 +181,7 @@ const GuideDetailsPage = () => {
       {/* Contenido del Tab Seleccionado */}
       <div>
         {activeIndex === 0 && <PlanDetails plan={plan} />}
-        {activeIndex === 1 && <VisitsList visits={plan.visits} />}
+        {activeIndex === 1 && <SearchableVisitsList visits={plan.visits} />}
         {activeIndex === 2 && <TimelineView plan={plan} />}
       </div>
     </div>

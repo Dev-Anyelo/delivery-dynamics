@@ -30,7 +30,6 @@ import {
 export const PlanHeader = ({ plan }: { plan: Plan }) => {
   const [isLoading, setIsLoading] = useState(false);
 
-  // Componente de React
   const handleSaveGuide = async () => {
     setIsLoading(true);
     try {
