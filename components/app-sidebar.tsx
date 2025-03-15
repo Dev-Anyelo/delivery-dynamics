@@ -19,7 +19,7 @@ import {
 const data = {
   teams: [
     {
-      name: "Delivery Dynamics",
+      name: "Feduro Corp",
       logo: PackageCheck,
       plan: "Enterprise",
     },
@@ -32,7 +32,7 @@ const data = {
       items: [
         {
           title: "Gestionar guías",
-          url: "/guides",
+          url: "/dashboard/guides",
         },
       ],
     },
@@ -43,7 +43,7 @@ const data = {
       items: [
         {
           title: "Gestionar clientes",
-          url: "/clients",
+          url: "/dashboard/clients",
         },
       ],
     },
@@ -54,7 +54,7 @@ const data = {
       items: [
         {
           title: "Gestionar usuarios",
-          url: "/users",
+          url: "/dashboard/users",
         },
       ],
     },
@@ -65,7 +65,7 @@ const data = {
       items: [
         {
           title: "Generar reportes",
-          url: "/reports",
+          url: "/dashboard/reports",
         },
       ],
     },

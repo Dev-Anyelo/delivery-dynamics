@@ -259,6 +259,7 @@ export function AccountSettings() {
 
               <div className="flex justify-end gap-2 col-span-2">
                 <Button
+                  type="button"
                   size="sm"
                   variant="outline"
                   onClick={() => reset()}

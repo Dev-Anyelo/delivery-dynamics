@@ -85,11 +85,11 @@ export default function LoginForm() {
                 className="w-full flex flex-col items-center"
               >
                 <Image
-                  src="/logo.png"
-                  alt="Delivery Dynamics"
-                  width={60}
+                  src="/feduro-logo.png"
+                  alt="Feduro Logo"
+                  width={100}
                   height={70}
-                  className="mb-8"
+                  className="mb-4"
                 />
 
                 <motion.div
@@ -114,9 +114,9 @@ export default function LoginForm() {
           <div className="p-6 md:p-8 lg:p-10">
             <div className="md:hidden flex justify-center mb-6">
               <Image
-                src="/logo.png"
-                alt="Delivery Dynamics"
-                width={50}
+                src="/feduro-logo.png"
+                alt="Feduro Logo"
+                width={90}
                 height={50}
               />
             </div>

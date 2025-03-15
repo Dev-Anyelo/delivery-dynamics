@@ -12,8 +12,9 @@ const geistSans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Delivery Dynamics",
-  description: "Mantén tu negocio en movimiento con Delivery Dynamics",
+  title: "Feduro - Distribución Exclusiva de Productos Masivos",
+  description:
+    "Distribución de alimentos, bebidas, lubricantes, perfumería y cosméticos. Presencia en Costa Rica y franquicia exclusiva de Heladerías Häagen Dazs.",
 };
 
 export default function RootLayout({
@@ -24,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/logo.png" type="image/jpeg" />
+        <link rel="icon" href="/feduro-logo.png" type="image/jpeg" />
       </head>
       <body className={`${geistSans.variable} antialiased`}>
         <ThemeProvider

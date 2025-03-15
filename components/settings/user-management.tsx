@@ -67,6 +67,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { formatDate } from "@/lib/utils";
 
 const tabVariants = {
   hidden: { opacity: 0, y: 10 },
@@ -97,7 +98,7 @@ export function UserManagement() {
       password: "",
       isActive: true,
       role: UserRole.Values.USER,
-      fechaCreacion: new Date(),
+      createdAt: new Date(),
     },
   });
 
@@ -219,11 +220,11 @@ export function UserManagement() {
   const getRoleIcon = (role: string) => {
     switch (role) {
       case UserRole.Values.ADMIN:
-        return <Shield className="size-4" />;
+        return <Shield className="size-4 inline mr-1" />;
       case UserRole.Values.MANAGER:
-        return <UserCog className="size-4" />;
+        return <UserCog className="size-4 inline mr-1" />;
       default:
-        return <UserIcon className="size-4" />;
+        return <UserIcon className="size-4 inline mr-1" />;
     }
   };
 
@@ -463,14 +464,14 @@ export function UserManagement() {
                               value="true"
                               className="flex items-center gap-2"
                             >
-                              <CheckCircle2 className="size-4 text-emerald-500" />
+                              <CheckCircle2 className="size-4 inline text-emerald-500 mr-1" />
                               Activo
                             </SelectItem>
                             <SelectItem
                               value="false"
                               className="flex items-center gap-2"
                             >
-                              <XCircle className="size-4 text-rose-500" />
+                              <XCircle className="size-4 text-rose-500 inline mr-1" />
                               Inactivo
                             </SelectItem>
                           </SelectContent>
@@ -504,7 +505,7 @@ export function UserManagement() {
                     <Button disabled={isSubmitting} type="submit">
                       {isSubmitting ? (
                         <>
-                          <Loader className="animate-spin size-4 mr-2" />
+                          <Loader className="animate-spin size-4" />
                           Guardando...
                         </>
                       ) : (
@@ -551,12 +552,11 @@ export function UserManagement() {
                           </div>
                           <div className="flex items-center text-xs text-muted-foreground gap-1 mt-0.5">
                             <Calendar className="size-3.5" />
-                            {user?.fechaCreacion &&
-                              new Date(
-                                user?.fechaCreacion
-                              ).toLocaleDateString()}
-                            {user?.fechaCreacion &&
-                              new Date(user?.fechaCreacion).toDateString() ===
+                            {user?.createdAt &&
+                              formatDate(user?.createdAt.toString())}
+
+                            {user?.createdAt &&
+                              new Date(user?.createdAt).toDateString() ===
                                 new Date().toDateString() && (
                                 <Badge
                                   variant="outline"
@@ -610,7 +610,7 @@ export function UserManagement() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-full bg-primary/5 hover:bg-primary/10"
+                            className="size-8 rounded-lg bg-primary/5 hover:bg-primary/10"
                             disabled={isSubmitting || isDeleting}
                             onClick={() => {
                               setSelectedUser(user);
@@ -624,7 +624,7 @@ export function UserManagement() {
                             disabled={isSubmitting || isDeleting}
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-full bg-destructive/5 hover:bg-destructive/10 text-destructive"
+                            className="size-8 rounded-lg bg-destructive/15 hover:bg-destructive/20 text-destructive"
                             onClick={() => setUserToDelete(user)}
                           >
                             {deletingUserId === user?.id ? (
@@ -678,7 +678,7 @@ export function UserManagement() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold flex items-center gap-2">
-                <Trash2 className="size-5 text-destructive" />
+                <Trash2 className="size-5" />
                 Confirmar Eliminación
               </DialogTitle>
               <DialogDescription className="pt-2">
@@ -707,12 +707,12 @@ export function UserManagement() {
               >
                 {isDeleting ? (
                   <>
-                    <Loader className="size-4 mr-2 animate-spin" />
+                    <Loader className="size-4 animate-spin" />
                     Eliminando...
                   </>
                 ) : (
                   <>
-                    <Trash2 className="size-4 mr-2" />
+                    <Trash2 className="size-4" />
                     Eliminar
                   </>
                 )}

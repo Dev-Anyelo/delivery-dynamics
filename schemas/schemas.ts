@@ -55,9 +55,7 @@ export const UserSchema = z.object({
     .or(z.literal("").optional()),
   role: UserRole,
   isActive: z.boolean().optional(),
-  fechaCreacion: z.preprocess((arg) => {
-    if (typeof arg === "string" || arg instanceof Date) return new Date(arg);
-  }, z.date().optional()),
+  createdAt: z.date().optional(),
 });
 
 export const FilterGuidesSchema = z.object({
